@@ -6,6 +6,118 @@ const { parseJMX, parseSamplers } = require('./parser');
 const { modifyJMX } = require('./modifier');
 const { spawn } = require('child_process');
 
+// Function to parse JMeter CSV results
+function parseJMeterCSV(csvPath) {
+  if (!fs.existsSync(csvPath)) {
+    return [];
+  }
+
+  try {
+    const csvContent = fs.readFileSync(csvPath, 'utf-8');
+    const lines = csvContent.split('\n');
+    
+    if (lines.length <= 1) {
+      return []; // No data or only header
+    }
+
+    const stats = {};
+
+    // Parse CSV properly (handle quoted fields with newlines)
+    for (let i = 1; i < lines.length; i++) {
+      let line = lines[i].trim();
+      if (!line) continue;
+
+      // Handle multi-line records (quoted fields with newlines)
+      while (line.split('"').length % 2 === 0 && i + 1 < lines.length) {
+        i++;
+        line += '\n' + lines[i];
+      }
+
+      // Simple CSV parse (handle quotes)
+      const parts = [];
+      let current = '';
+      let inQuotes = false;
+      
+      for (let j = 0; j < line.length; j++) {
+        const char = line[j];
+        if (char === '"') {
+          inQuotes = !inQuotes;
+        } else if (char === ',' && !inQuotes) {
+          parts.push(current);
+          current = '';
+        } else {
+          current += char;
+        }
+      }
+      parts.push(current);
+
+      if (parts.length < 10) continue;
+
+      let label = parts[2] ? parts[2].trim() : ''; // Column 3: label
+      if (!label) {
+        // If label is empty (error case), use responseMessage or fallback
+        const errorMsg = parts[4] ? parts[4].trim() : 'Unknown Error';
+        label = `[ERROR] ${errorMsg}`;
+      }
+
+      const success = parts[7] === 'true'; // Column 8: success
+      const elapsed = parseInt(parts[1], 10) || 0; // Column 2: elapsed time (ms)
+      const bytes = parseInt(parts[9], 10) || 0; // Column 10: bytes
+
+      if (!stats[label]) {
+        stats[label] = {
+          count: 0,
+          failures: 0,
+          times: [],
+          bytes: []
+        };
+      }
+
+      stats[label].count++;
+      if (!success) {
+        stats[label].failures++;
+      }
+      stats[label].times.push(elapsed);
+      stats[label].bytes.push(bytes);
+    }
+
+    // Calculate aggregated stats
+    const result = Object.keys(stats).map(label => {
+      const data = stats[label];
+      const sortedTimes = data.times.slice().sort((a, b) => a - b);
+      
+      const median = sortedTimes[Math.floor(sortedTimes.length * 0.5)] || 0;
+      const p95 = sortedTimes[Math.floor(sortedTimes.length * 0.95)] || 0;
+      const p99 = sortedTimes[Math.floor(sortedTimes.length * 0.99)] || 0;
+      const avg = Math.round(data.times.reduce((a, b) => a + b, 0) / data.times.length) || 0;
+      const min = Math.min(...data.times) || 0;
+      const max = Math.max(...data.times) || 0;
+      const avgSize = Math.round(data.bytes.reduce((a, b) => a + b, 0) / data.bytes.length) || 0;
+
+      return {
+        type: 'HTTP',
+        name: label,
+        requests: data.count,
+        fails: data.failures,
+        median,
+        p95,
+        p99,
+        avg,
+        min,
+        max,
+        avgSize,
+        currentRps: 0,
+        currentFailures: 0
+      };
+    });
+
+    return result;
+  } catch (error) {
+    console.error('Error parsing CSV:', error);
+    return [];
+  }
+}
+
 // Function to load .env file
 function loadEnv() {
   const envPath = path.join(process.cwd(), '.env');
@@ -117,29 +229,60 @@ class WebServer {
     this.app.get('/api/stats', (req, res) => {
       try {
         const isRunning = this.testState.running;
+        const hasResults = this.testState.resultFile && fs.existsSync(this.testState.resultFile);
         
-        // Build requests array from actual samplers
-        const requests = this.testState.samplers.map(samplerName => ({
-          type: 'HTTP',
-          name: samplerName,
-          requests: isRunning ? Math.floor(Math.random() * 100) + 50 : 0,
-          fails: isRunning ? Math.floor(Math.random() * 5) : 0,
-          median: isRunning ? Math.floor(Math.random() * 500) + 200 : 0,
-          p95: isRunning ? Math.floor(Math.random() * 1000) + 500 : 0,
-          p99: isRunning ? Math.floor(Math.random() * 2000) + 1000 : 0,
-          avg: isRunning ? Math.floor(Math.random() * 700) + 300 : 0,
-          min: isRunning ? Math.floor(Math.random() * 200) + 100 : 0,
-          max: isRunning ? Math.floor(Math.random() * 3000) + 1500 : 0,
-          avgSize: isRunning ? Math.floor(Math.random() * 1000) + 500 : 0,
-          currentRps: isRunning ? (Math.random() * 3).toFixed(1) : 0,
-          currentFailures: isRunning ? (Math.random() * 0.5).toFixed(1) : 0
-        }));
+        let requests = [];
+        let totalRequests = 0;
+        let totalFailures = 0;
+        
+        // Debug logging
+        console.log(`[STATS] Running: ${isRunning}, ResultFile: ${this.testState.resultFile}, Exists: ${hasResults}`);
+        
+        // Parse real CSV data if available
+        if (hasResults) {
+          requests = parseJMeterCSV(this.testState.resultFile);
+          totalRequests = requests.reduce((sum, r) => sum + r.requests, 0);
+          totalFailures = requests.reduce((sum, r) => sum + r.fails, 0);
+          console.log(`[STATS] Parsed ${requests.length} samplers, ${totalRequests} total requests`);
+        } else if (this.testState.samplers.length > 0) {
+          // If test is starting but no data yet, show samplers with 0 values
+          requests = this.testState.samplers.map(samplerName => ({
+            type: 'HTTP',
+            name: samplerName,
+            requests: 0,
+            fails: 0,
+            median: 0,
+            p95: 0,
+            p99: 0,
+            avg: 0,
+            min: 0,
+            max: 0,
+            avgSize: 0,
+            currentRps: 0,
+            currentFailures: 0
+          }));
+        }
+        
+        const failureRate = totalRequests > 0 
+          ? ((totalFailures / totalRequests) * 100).toFixed(1) + '%'
+          : '0%';
+        
+        // Status logic: COMPLETED only if CSV has data AND test finished
+        let status = 'READY';
+        if (isRunning) {
+          status = 'RUNNING';
+        } else if (!isRunning && this.testState.reportDir && hasResults && totalRequests > 0) {
+          status = 'COMPLETED';
+        } else if (!isRunning && this.testState.reportDir) {
+          // Test finished but CSV not ready yet
+          status = 'PROCESSING';
+        }
         
         const stats = {
-          status: isRunning ? 'RUNNING' : (this.testState.reportDir ? 'COMPLETED' : 'READY'),
-          users: isRunning ? Math.floor(Math.random() * 10) + 1 : 0,
-          rps: isRunning ? (Math.random() * 5).toFixed(1) : 0,
-          failures: isRunning ? (Math.random() * 5).toFixed(1) + '%' : '0%',
+          status,
+          users: totalRequests, // Use total requests as approximation
+          rps: 0, // TODO: Calculate from time window if needed
+          failures: failureRate,
           requests,
           reportDir: this.testState.reportDir,
           timestamp: this.testState.timestamp
@@ -214,11 +357,12 @@ class WebServer {
           .substring(0, 15);
         
         const reportDir = path.join(process.cwd(), 'reports', `report-${timestamp}`);
-        const resultFile = path.join(process.cwd(), `result-${timestamp}.csv`);
+        const resultFile = path.join(process.cwd(), 'data', environment, `result-${timestamp}.csv`);
         const logFile = path.join(process.cwd(), 'jmeter_logs', `jmeter-${timestamp}.log`);
         
         // Ensure directories exist
         await fs.ensureDir(path.join(process.cwd(), 'reports'));
+        await fs.ensureDir(path.join(process.cwd(), 'data', environment));
         await fs.ensureDir(path.join(process.cwd(), 'jmeter_logs'));
         
         // Load environment-specific properties

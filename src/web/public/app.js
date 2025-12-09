@@ -561,13 +561,29 @@ function startStatsPolling() {
       // Update header stats
       statusValue.textContent = data.status;
       
+      // Always update table and header values with latest data
+      usersValue.textContent = data.users;
+      rpsValue.textContent = data.rps;
+      failuresValue.textContent = data.failures;
+      
+      // Always update stats table with latest data
+      updateStatsTable(data.requests);
+      
       if (data.status === 'RUNNING') {
-        statusValue.style.color = '#ff6b6b';
+        statusValue.style.color = 'white';
         // Enable stop button when running
         if (stopBtn) stopBtn.disabled = false;
+        // Update charts while running
+        updateCharts(data);
+      } else if (data.status === 'PROCESSING') {
+        statusValue.style.color = '#ffa500'; // Orange for processing
+        // Keep polling until CSV is ready
+        if (stopBtn) stopBtn.disabled = true;
       } else if (data.status === 'COMPLETED') {
         statusValue.style.color = '#4caf50';
-        // Stop polling when test completes
+        // Update one final time with completed data
+        updateCharts(data);
+        // Stop polling after showing completion
         if (statsInterval) {
           clearInterval(statsInterval);
           statsInterval = null;
@@ -579,20 +595,8 @@ function startStatsPolling() {
         // Show completion notification
         alert('✅ Test completed! Report is ready.');
       } else {
-        statusValue.style.color = '#666';
+        statusValue.style.color = 'white';
         if (stopBtn) stopBtn.disabled = true;
-      }
-      
-      usersValue.textContent = data.users;
-      rpsValue.textContent = data.rps;
-      failuresValue.textContent = data.failures;
-      
-      // Update stats table
-      updateStatsTable(data.requests);
-      
-      // Update charts (only if running)
-      if (data.status === 'RUNNING') {
-        updateCharts(data);
       }
       
     } catch (error) {
