@@ -1,236 +1,469 @@
-# JAWA Framework 🎯
+# JAWA Framework 🚀# JAWA Framework 🎯
 
-**JavaScript Wrapper for Apache JMeter**
 
-JAWA (JavaScript Apache Wrapper for JMeter) is a CLI tool that simplifies JMeter project setup and execution. Initialize JMeter test projects with a single command and manage your performance tests using familiar npm workflows.
 
-## Features
+**JavaScript Apache Wrapper for JMeter****JavaScript Wrapper for Apache JMeter**
 
-- 🚀 Quick JMeter project initialization with starter templates
+
+
+Simplify JMeter performance testing with a modern CLI tool. Initialize projects, run tests, and view reports with simple commands.JAWA (JavaScript Apache Wrapper for JMeter) is a CLI tool that simplifies JMeter project setup and execution. Initialize JMeter test projects with a single command and manage your performance tests using familiar npm workflows.
+
+
+
+---## Features
+
+
+
+## Installation- 🚀 Quick JMeter project initialization with starter templates
+
 - 📦 Generates complete JMeter test structure (`.jmx`, properties files)
-- ⚡ Run JMeter tests via simple CLI commands
-- 📊 Automatic HTML report generation
-- 🛠️ Configurable test parameters (threads, ramp-up, duration)
+
+```bash- ⚡ Run JMeter tests via simple CLI commands
+
+npm install -g jawa- 📊 Automatic HTML report generation
+
+```- 🛠️ Configurable test parameters (threads, ramp-up, duration)
+
 - 📝 Pre-configured test plans with best practices
-- 🎨 Beautiful console output and progress tracking
-- 🔧 Easy integration with npm scripts
 
-## Prerequisites
+Verify:- 🎨 Beautiful console output and progress tracking
 
-**JMeter must be installed on your system:**
+```bash- 🔧 Easy integration with npm scripts
 
-### macOS
+jawa --version
+
+```## Prerequisites
+
+
+
+---**JMeter must be installed on your system:**
+
+
+
+## Prerequisites### macOS
+
 \`\`\`bash
-brew install jmeter
+
+**JMeter must be installed:**brew install jmeter
+
 \`\`\`
 
-### Linux
-Download from [Apache JMeter](https://jmeter.apache.org/download_jmeter.cgi) and add to PATH
+```bash
 
-### Windows
-Download from [Apache JMeter](https://jmeter.apache.org/download_jmeter.cgi) and add to PATH
+# macOS### Linux
+
+brew install jmeterDownload from [Apache JMeter](https://jmeter.apache.org/download_jmeter.cgi) and add to PATH
+
+
+
+# Linux/Windows### Windows
+
+# Download from https://jmeter.apache.org/Download from [Apache JMeter](https://jmeter.apache.org/download_jmeter.cgi) and add to PATH
+
+```
 
 Verify installation:
-\`\`\`bash
-jmeter --version
-\`\`\`
+
+Verify:\`\`\`bash
+
+```bashjmeter --version
+
+jmeter --version\`\`\`
+
+```
 
 ## Installation
 
+---
+
 ### Global Installation (Recommended)
-
-Install JAWA globally to use the CLI from anywhere:
-
-\`\`\`bash
-npm install -g jawa
-\`\`\`
-
-### Local Installation
-
-Or install it locally in your project:
-
-\`\`\`bash
-npm install jawa
-\`\`\`
 
 ## Quick Start
 
-### 1. Create a New JMeter Project
+Install JAWA globally to use the CLI from anywhere:
+
+### 1. Create New Project
 
 \`\`\`bash
-jawa init my-performance-tests
+
+```bashnpm install -g jawa
+
+jawa init my-project\`\`\`
+
+cd my-project
+
+```### Local Installation
+
+
+
+Creates:Or install it locally in your project:
+
+```
+
+my-project/\`\`\`bash
+
+├── main.jmx              # JMeter test plannpm install jawa
+
+├── config/\`\`\`
+
+│   └── user.properties   # Test configuration
+
+├── reports/              # HTML reports (timestamped)## Quick Start
+
+├── results/              # Test results (CSV)
+
+├── jmeter_logs/          # JMeter logs### 1. Create a New JMeter Project
+
+├── report-zips/          # Archived reports
+
+└── result-zips/          # Archived results\`\`\`bash
+
+```jawa init my-performance-tests
+
 \`\`\`
+
+### 2. Run Test
 
 This will create a complete JMeter project with:
 
-\`\`\`
-my-performance-tests/
+```bash
+
+jawa run --loop=1 --user=1 --ramp=1\`\`\`
+
+```my-performance-tests/
+
 ├── main.jmx                    # JMeter test plan
-├── config/
-│   ├── user.properties         # User-defined test properties
-│   ├── jmeter.properties       # JMeter configuration
-│   └── jawa.config.js          # JAWA framework config
-├── tests/                      # Additional test scripts
+
+**Parameters:**├── config/
+
+- `--loop` - Loop count per user (default: 1)│   ├── user.properties         # User-defined test properties
+
+- `--user` - Number of concurrent users (default: 1)│   ├── jmeter.properties       # JMeter configuration
+
+- `--ramp` - Ramp-up period in seconds (default: 1)│   └── jawa.config.js          # JAWA framework config
+
+- `--heap` - JVM memory (default: 3g)├── tests/                      # Additional test scripts
+
 ├── data/                       # CSV/JSON test data
-├── reports/                    # Test results and HTML reports
-├── lib/                        # Custom libraries
-├── package.json
-└── README.md
+
+**Examples:**├── reports/                    # Test results and HTML reports
+
+```bash├── lib/                        # Custom libraries
+
+# Quick test├── package.json
+
+jawa run --loop=1 --user=1 --ramp=1└── README.md
+
 \`\`\`
 
-### 2. Navigate to Your Project
+# Load test
 
-\`\`\`bash
-cd my-performance-tests
+jawa run --loop=10 --user=50 --ramp=5### 2. Navigate to Your Project
+
+
+
+# Stress test with more memory\`\`\`bash
+
+jawa run --loop=20 --user=100 --ramp=10 --heap=4gcd my-performance-tests
+
+```\`\`\`
+
+
+
+### 3. View Report### 3. Run Your First Test
+
+
+
+```bashRun JMeter test (automatically generates HTML report):
+
+jawa report\`\`\`bash
+
+```npm test
+
 \`\`\`
 
-### 3. Run Your First Test
-
-Run JMeter test (automatically generates HTML report):
-\`\`\`bash
-npm test
-\`\`\`
+Opens the latest HTML report in your browser.
 
 This will:
-- Execute the JMeter test in non-GUI mode
+
+---- Execute the JMeter test in non-GUI mode
+
 - Save results to `reports/results.jtl`
-- Automatically generate HTML dashboard at `reports/html/`
+
+## Commands- Automatically generate HTML dashboard at `reports/html/`
+
 - Show you the report location
 
-### 4. View HTML Report
+### `jawa init <project-name>`
 
-Open the generated HTML report in your browser:
-\`\`\`bash
+Initialize new JAWA project with JMeter test template.### 4. View HTML Report
+
+
+
+### `jawa run [options]`Open the generated HTML report in your browser:
+
+Run JMeter performance test.\`\`\`bash
+
 npm run report
-\`\`\`
 
-Or manually open: `reports/html/index.html`
+**Options:**\`\`\`
 
-The report includes:
-- 📊 Test statistics and graphs
-- ⏱️ Response times and throughput
-- ✅ Success/failure rates
+- `-l, --loop <number>` - Loop count (default: 1)
+
+- `-u, --user <number>` - Number of users (default: 1)Or manually open: `reports/html/index.html`
+
+- `-r, --ramp <seconds>` - Ramp-up time (default: 1)
+
+- `-d, --duration <seconds>` - Test duration in seconds (default: 0 = loop-based)The report includes:
+
+- `--heap <memory>` - JVM heap memory (default: 3g)- 📊 Test statistics and graphs
+
+- `--base-url <url>` - Override base URL- ⏱️ Response times and throughput
+
+- `-g, --gui` - Open JMeter GUI- ✅ Success/failure rates
+
 - 📈 Over time graphs
-- 🎯 Detailed metrics per request
+
+### `jawa report`- 🎯 Detailed metrics per request
+
+Open latest HTML report in browser.
 
 ## Configuration
 
+---
+
 ### User Properties (`config/user.properties`)
+
+## Features
 
 Edit to customize test parameters:
 
-\`\`\`properties
-# Target Configuration
-base.url=http://localhost:8080
+✅ **Timestamped Reports** - Every run creates separate report folder  
 
-# Load Configuration
+✅ **Auto ZIP Archives** - Results automatically compressed for sharing  \`\`\`properties
+
+✅ **Integrated Report Generation** - No separate steps, no hanging  # Target Configuration
+
+✅ **Cross-Platform** - Works on macOS, Windows, Linux  base.url=http://localhost:8080
+
+✅ **Dynamic Memory** - Configurable heap size for large tests  
+
+✅ **Professional Output** - Clean console logs with progress tracking  # Load Configuration
+
 threads=10
-rampup=5
+
+---rampup=5
+
 duration=60
 
+## Output Structure
+
 # HTTP Configuration
-http.connection.timeout=30000
-http.response.timeout=30000
-\`\`\`
 
-### JMeter Test Plan (`main.jmx`)
+```http.connection.timeout=30000
 
-The generated test plan includes:
-- ✅ Configurable thread groups
-- ✅ HTTP request samplers
-- ✅ Response assertions (status code)
-- ✅ Duration assertions (response time < 2s)
-- ✅ Summary report listener
-- ✅ Results tree listener
+my-project/http.response.timeout=30000
 
-Edit `main.jmx` in JMeter GUI to customize:
+├── reports/\`\`\`
+
+│   ├── report-20241209-143022/    # HTML dashboard
+
+│   └── report-20241209-145530/### JMeter Test Plan (`main.jmx`)
+
+├── results/
+
+│   ├── result-20241209-143022/    # CSV resultsThe generated test plan includes:
+
+│   └── result-20241209-145530/- ✅ Configurable thread groups
+
+├── jmeter_logs/- ✅ HTTP request samplers
+
+│   └── jmeter-20241209-143022.log- ✅ Response assertions (status code)
+
+├── report-zips/                    # Shareable archives- ✅ Duration assertions (response time < 2s)
+
+│   └── report-20241209-143022.zip- ✅ Summary report listener
+
+└── result-zips/- ✅ Results tree listener
+
+    └── result-20241209-143022.zip
+
+```Edit `main.jmx` in JMeter GUI to customize:
+
 \`\`\`bash
-npm run test:gui
+
+---npm run test:gui
+
 \`\`\`
+
+## Workflow
 
 ## HTML Dashboard Reports
 
-After running tests with `npm test` or `jawa run`, an HTML dashboard report is automatically generated at `reports/html/index.html`.
+```bash
 
-### Report Contents
+# 1. Create projectAfter running tests with `npm test` or `jawa run`, an HTML dashboard report is automatically generated at `reports/html/index.html`.
 
-The HTML report includes:
+jawa init load-test
+
+cd load-test### Report Contents
+
+
+
+# 2. Edit test plan (optional)The HTML report includes:
+
+jawa run --gui
 
 - **📊 Dashboard Overview** - Summary statistics and key metrics
-- **📈 Over Time Graphs** - Response times, throughput, active threads
-- **📉 Throughput** - Requests per second over time
+
+# 3. Run test- **📈 Over Time Graphs** - Response times, throughput, active threads
+
+jawa run --loop=5 --user=10 --ramp=2- **📉 Throughput** - Requests per second over time
+
 - **⏱️ Response Times** - Min, max, avg, percentiles (90%, 95%, 99%)
-- **✅ Success Rate** - Percentage of successful requests
-- **📋 Statistics Table** - Detailed metrics per request
+
+# 4. View results- **✅ Success Rate** - Percentage of successful requests
+
+jawa report- **📋 Statistics Table** - Detailed metrics per request
+
 - **❌ Error Analysis** - Failed requests and error messages
 
-### Viewing Reports
+# 5. Share results
+
+# Just send: report-zips/report-TIMESTAMP.zip### Viewing Reports
+
+```
 
 \`\`\`bash
-# Method 1: Use JAWA command (opens in browser)
+
+---# Method 1: Use JAWA command (opens in browser)
+
 npm run report
 
+## Tips
+
 # Method 2: Use JAWA CLI directly
-jawa report
 
-# Method 3: Open manually
-open reports/html/index.html  # macOS
-xdg-open reports/html/index.html  # Linux
+### Memory Sizingjawa report
+
+- **1-10 users:** `--heap=1g`
+
+- **10-50 users:** `--heap=2g`# Method 3: Open manually
+
+- **50-100 users:** `--heap=3g` (default)open reports/html/index.html  # macOS
+
+- **100+ users:** `--heap=4g` or higherxdg-open reports/html/index.html  # Linux
+
 start reports/html/index.html  # Windows
+
+### Loop vs Duration\`\`\`
+
+```bash
+
+# Loop-based (recommended for API tests)### Report Directory Structure
+
+jawa run --loop=10 --user=5
+
 \`\`\`
 
-### Report Directory Structure
+# Time-based (endurance tests)reports/
 
-\`\`\`
-reports/
-├── results.jtl              # Raw test results (CSV format)
-└── html/                    # HTML Dashboard
+jawa run --duration=300 --user=10  # 5 minutes├── results.jtl              # Raw test results (CSV format)
+
+```└── html/                    # HTML Dashboard
+
     ├── index.html          # Main report page
-    ├── content/            # Report content and assets
-    └── sbadmin2-1.0.7/     # UI framework
-\`\`\`
 
-## Working with JMeter Test Plans
+### Custom Test Plans    ├── content/            # Report content and assets
 
-### Editing Tests
+Edit `main.jmx` with JMeter GUI:    └── sbadmin2-1.0.7/     # UI framework
 
-1. Open JMeter GUI:
+```bash\`\`\`
+
+jawa run --gui
+
+```## Working with JMeter Test Plans
+
+
+
+---### Editing Tests
+
+
+
+## Troubleshooting1. Open JMeter GUI:
+
    \`\`\`bash
-   npm run test:gui
-   \`\`\`
 
-2. Modify your test plan:
-   - Add HTTP requests
+### JMeter Not Found   npm run test:gui
+
+```bash   \`\`\`
+
+# Install JMeter first
+
+brew install jmeter  # macOS2. Modify your test plan:
+
+```   - Add HTTP requests
+
    - Configure thread groups
-   - Add assertions and validators
-   - Set up timers and logic controllers
-   - Add CSV data sets from `data/` folder
 
-3. Save and run:
+### Out of Memory   - Add assertions and validators
+
+```bash   - Set up timers and logic controllers
+
+# Increase heap size   - Add CSV data sets from `data/` folder
+
+jawa run --heap=4g --loop=10 --user=50
+
+```3. Save and run:
+
    \`\`\`bash
-   npm test
-   \`\`\`
 
-### Adding HTTP Requests
+### Report Not Generated   npm test
+
+Check log file:   \`\`\`
+
+```bash
+
+cat jmeter_logs/jmeter-TIMESTAMP.log### Adding HTTP Requests
+
+```
 
 In JMeter GUI:
-1. Right-click on Thread Group → Add → Sampler → HTTP Request
+
+---1. Right-click on Thread Group → Add → Sampler → HTTP Request
+
 2. Configure server name/IP, port, protocol, and path
-3. Add request parameters, headers, or body data
+
+## License3. Add request parameters, headers, or body data
+
 4. Add assertions to validate responses
+
+MIT
 
 ### Using CSV Data Sets
 
+---
+
 1. Place CSV files in `data/` folder
-2. In JMeter GUI: Thread Group → Add → Config Element → CSV Data Set Config
+
+## Support2. In JMeter GUI: Thread Group → Add → Config Element → CSV Data Set Config
+
 3. Configure filename and variable names
-4. Reference variables in HTTP requests as `${variable_name}`
 
-## CLI Commands
+- 📖 Documentation: [NEW_WORKFLOW.md](./NEW_WORKFLOW.md)4. Reference variables in HTTP requests as `${variable_name}`
 
-### Initialize a New Project
+- 🐛 Issues: [GitHub Issues](https://github.com/badrusalam11/jawa-framework/issues)
 
-\`\`\`bash
+- 💬 Discussions: [GitHub Discussions](https://github.com/badrusalam11/jawa-framework/discussions)## CLI Commands
+
+
+
+---### Initialize a New Project
+
+
+
+**Made with ❤️ for performance testers**\`\`\`bash
+
 jawa init <project-name> [options]
 \`\`\`
 

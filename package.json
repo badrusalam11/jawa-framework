@@ -1,13 +1,13 @@
 {
   "name": "jawa",
   "version": "1.0.0",
-  "description": "JavaScript wrapper for Apache JMeter - Quick project setup and test execution",
+  "description": "JavaScript Apache Wrapper for JMeter - Performance testing CLI tool",
   "main": "src/index.js",
   "bin": {
     "jawa": "./bin/jawa.js"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Run: jawa init test-project && cd test-project && jawa run\""
   },
   "keywords": [
     "jmeter",
@@ -15,22 +15,27 @@
     "testing",
     "load-testing",
     "stress-testing",
-    "framework"
+    "cli",
+    "performance-testing",
+    "apache-jmeter"
   ],
-  "author": "",
+  "author": "badrusalam11",
   "license": "MIT",
   "dependencies": {
     "archiver": "^7.0.1",
     "chalk": "^4.1.2",
     "commander": "^11.1.0",
-    "fs-extra": "^11.2.0",
-    "inquirer": "^8.2.6"
+    "fs-extra": "^11.2.0"
   },
   "engines": {
     "node": ">=14.0.0"
   },
   "repository": {
     "type": "git",
-    "url": ""
-  }
+    "url": "https://github.com/badrusalam11/jawa-framework.git"
+  },
+  "bugs": {
+    "url": "https://github.com/badrusalam11/jawa-framework/issues"
+  },
+  "homepage": "https://github.com/badrusalam11/jawa-framework#readme"
 }

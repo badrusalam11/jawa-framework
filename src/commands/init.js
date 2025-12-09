@@ -31,7 +31,7 @@ async function initCommand(projectName, options) {
     }
 
     // Copy template files from templates directory
-    const templateDir = path.join(__dirname, '../../templates', options.template || 'basic');
+    const templateDir = path.join(__dirname, '../../templates/basic');
     
     // Copy JMeter template files
     try {

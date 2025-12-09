@@ -15,9 +15,8 @@ program
 program
   .command('init <project-name>')
   .description('Initialize a new JAWA project with JMeter test files')
-  .option('-t, --template <type>', 'Project template type (basic, advanced)', 'basic')
-  .action((projectName, options) => {
-    initCommand(projectName, options);
+  .action((projectName) => {
+    initCommand(projectName, {});
   });
 
 program
@@ -37,10 +36,9 @@ program
 
 program
   .command('report')
-  .description('Open HTML test report in browser')
-  .option('-d, --dir <path>', 'Report directory', 'reports/html')
-  .action((options) => {
-    reportCommand(options);
+  .description('Open latest HTML test report in browser')
+  .action(() => {
+    reportCommand();
   });
 
 program.parse(process.argv);
