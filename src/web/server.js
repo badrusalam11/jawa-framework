@@ -158,7 +158,8 @@ class WebServer {
       reportDir: null,
       timestamp: null,
       resultFile: null,
-      samplers: []
+      samplers: [],
+      lastValidStats: null // Cache last valid parsed stats
     };
     
     this.setupMiddleware();
@@ -234,18 +235,56 @@ class WebServer {
         let requests = [];
         let totalRequests = 0;
         let totalFailures = 0;
+        let useCache = false;
         
         // Debug logging
         console.log(`[STATS] Running: ${isRunning}, ResultFile: ${this.testState.resultFile}, Exists: ${hasResults}`);
         
         // Parse real CSV data if available
         if (hasResults) {
-          requests = parseJMeterCSV(this.testState.resultFile);
-          totalRequests = requests.reduce((sum, r) => sum + r.requests, 0);
-          totalFailures = requests.reduce((sum, r) => sum + r.fails, 0);
-          console.log(`[STATS] Parsed ${requests.length} samplers, ${totalRequests} total requests`);
+          const parsedData = parseJMeterCSV(this.testState.resultFile);
+          
+          if (parsedData.length > 0) {
+            // Valid data parsed, use it and cache it
+            requests = parsedData;
+            totalRequests = requests.reduce((sum, r) => sum + r.requests, 0);
+            totalFailures = requests.reduce((sum, r) => sum + r.fails, 0);
+            
+            // Cache this valid data
+            this.testState.lastValidStats = {
+              requests,
+              totalRequests,
+              totalFailures
+            };
+            
+            console.log(`[STATS] Parsed ${requests.length} samplers, ${totalRequests} total requests`);
+          } else if (this.testState.lastValidStats) {
+            // CSV exists but empty/no data yet, use cached data
+            console.log(`[STATS] CSV empty, using cached data`);
+            requests = this.testState.lastValidStats.requests;
+            totalRequests = this.testState.lastValidStats.totalRequests;
+            totalFailures = this.testState.lastValidStats.totalFailures;
+            useCache = true;
+          } else if (this.testState.samplers.length > 0) {
+            // No cache yet, show samplers with 0 values
+            requests = this.testState.samplers.map(samplerName => ({
+              type: 'HTTP',
+              name: samplerName,
+              requests: 0,
+              fails: 0,
+              median: 0,
+              p95: 0,
+              p99: 0,
+              avg: 0,
+              min: 0,
+              max: 0,
+              avgSize: 0,
+              currentRps: 0,
+              currentFailures: 0
+            }));
+          }
         } else if (this.testState.samplers.length > 0) {
-          // If test is starting but no data yet, show samplers with 0 values
+          // File doesn't exist yet, show samplers with 0 values
           requests = this.testState.samplers.map(samplerName => ({
             type: 'HTTP',
             name: samplerName,
@@ -624,7 +663,8 @@ class WebServer {
           reportDir: null,
           timestamp: null,
           resultFile: null,
-          samplers: []
+          samplers: [],
+          lastValidStats: null
         };
         
         console.log(chalk.blue('\n🔄 Test state reset\n'));

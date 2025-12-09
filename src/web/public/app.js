@@ -48,12 +48,16 @@ let chartData = {
 // Initialize
 async function init() {
   // Check if test is already running (page refresh)
-  await checkTestStatus();
+  const isResuming = await checkTestStatus();
   
-  await Promise.all([
-    loadEnvironments(),
-    loadThreadGroups()
-  ]);
+  // Only load form if not resuming a test
+  if (!isResuming) {
+    await Promise.all([
+      loadEnvironments(),
+      loadThreadGroups()
+    ]);
+  }
+  
   setupEventListeners();
   initCharts();
 }
@@ -64,21 +68,39 @@ async function checkTestStatus() {
     const response = await fetch('/api/test-status');
     const data = await response.json();
     
-    if (data.running) {
-      // Resume monitoring UI
+    if (data.running || data.reportDir) {
+      // Resume monitoring UI if test is running or completed
       loadingEl.style.display = 'none';
       testFormEl.style.display = 'none';
       testMonitoringEl.style.display = 'block';
       headerStats.style.display = 'flex';
       headerActions.style.display = 'flex';
       
-      statusValue.textContent = 'RUNNING';
-      statusValue.style.color = '#ff6b6b';
+      if (data.running) {
+        statusValue.textContent = 'RUNNING';
+        statusValue.style.color = 'white';
+        startStatsPolling();
+      } else {
+        // Test completed, fetch final stats
+        statusValue.textContent = 'COMPLETED';
+        statusValue.style.color = '#4caf50';
+        // Fetch and display final stats
+        const statsResponse = await fetch('/api/stats');
+        const statsData = await statsResponse.json();
+        updateStatsTable(statsData.requests);
+        usersValue.textContent = statsData.users;
+        rpsValue.textContent = statsData.rps;
+        failuresValue.textContent = statsData.failures;
+        enableDownloadButtons();
+      }
       
-      startStatsPolling();
+      return true; // Indicate we're resuming
     }
+    
+    return false; // Not resuming, normal flow
   } catch (error) {
     console.error('Error checking test status:', error);
+    return false;
   }
 }
 

@@ -65,6 +65,14 @@ program
     reportCommand();
   });
 
+program
+  .command('stop')
+  .description('Stop all running JAWA processes (JMeter tests and web server)')
+  .action(() => {
+    const stopCommand = require('../src/commands/stop');
+    stopCommand();
+  });
+
 program.parse(process.argv);
 
 // Show help if no command is provided

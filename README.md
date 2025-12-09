@@ -167,6 +167,29 @@ Open the latest HTML report in your browser.
 jawa report
 ```
 
+### jawa stop
+
+Stop all running JAWA processes (JMeter tests and web servers).
+
+```bash
+jawa stop
+```
+
+Forcefully terminates:
+- All running JMeter test processes
+- JAWA web UI servers
+- Background test executions
+
+**Cross-platform support:**
+- macOS/Linux: Uses `pkill` to find and stop processes
+- Windows: Uses `taskkill` to terminate processes
+
+**When to use:**
+- Tests are stuck or not responding
+- Need to kill background web servers
+- Clean up before starting new tests
+- Emergency stop during runaway tests
+
 ---
 
 ## 🎯 Features
