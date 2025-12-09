@@ -1,304 +1,606 @@
-# JAWA Framework 🎯
+# JAWA 🚀# JAWA Framework 🎯
 
 
 
-**JavaScript Apache Wrapper for JMeter****JavaScript Wrapper for Apache JMeter**
+**JavaScript Apache Wrapper for JMeter**
 
 
+
+A modern CLI tool to simplify JMeter performance testing. Initialize projects, run tests, and view reports with simple commands.**JavaScript Apache Wrapper for JMeter****JavaScript Wrapper for Apache JMeter**
+
+
+
+[![npm version](https://img.shields.io/npm/v/jawa.svg)](https://www.npmjs.com/package/jawa)
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 Simplify JMeter performance testing with a modern CLI tool. Initialize projects, run tests, and view reports with simple commands.JAWA (JavaScript Apache Wrapper for JMeter) is a CLI tool that simplifies JMeter project setup and execution. Initialize JMeter test projects with a single command and manage your performance tests using familiar npm workflows.
 
+---
 
+
+
+## 📦 Installation
 
 ---## Features
 
+```bash
 
+npm install -g jawa
+
+```
 
 ## Installation- 🚀 Quick JMeter project initialization with starter templates
 
-- 📦 Generates complete JMeter test structure (`.jmx`, properties files)
+**Verify installation:**
 
-```bash- ⚡ Run JMeter tests via simple CLI commands
-
-npm install -g jawa- 📊 Automatic HTML report generation
-
-```- 🛠️ Configurable test parameters (threads, ramp-up, duration)
-
-- 📝 Pre-configured test plans with best practices
-
-Verify:- 🎨 Beautiful console output and progress tracking
-
-```bash- 🔧 Easy integration with npm scripts
+```bash- 📦 Generates complete JMeter test structure (`.jmx`, properties files)
 
 jawa --version
 
-```## Prerequisites
+``````bash- ⚡ Run JMeter tests via simple CLI commands
 
 
 
----**JMeter must be installed on your system:**
+---npm install -g jawa- 📊 Automatic HTML report generation
 
 
 
-## Prerequisites### macOS
+## ⚡ Prerequisites```- 🛠️ Configurable test parameters (threads, ramp-up, duration)
 
-\`\`\`bash
 
-**JMeter must be installed:**brew install jmeter
 
-\`\`\`
+**JMeter must be installed:**- 📝 Pre-configured test plans with best practices
+
+
+
+```bashVerify:- 🎨 Beautiful console output and progress tracking
+
+# macOS
+
+brew install jmeter```bash- 🔧 Easy integration with npm scripts
+
+
+
+# Linux/Windowsjawa --version
+
+# Download from: https://jmeter.apache.org
+
+``````## Prerequisites
+
+
+
+**Verify JMeter:**
 
 ```bash
 
-# macOS### Linux
-
-brew install jmeterDownload from [Apache JMeter](https://jmeter.apache.org/download_jmeter.cgi) and add to PATH
-
-
-
-# Linux/Windows### Windows
-
-# Download from https://jmeter.apache.org/Download from [Apache JMeter](https://jmeter.apache.org/download_jmeter.cgi) and add to PATH
+jmeter --version---**JMeter must be installed on your system:**
 
 ```
 
-Verify installation:
 
-Verify:\`\`\`bash
-
-```bashjmeter --version
-
-jmeter --version\`\`\`
-
-```
-
-## Installation
 
 ---
 
-### Global Installation (Recommended)
+## Prerequisites### macOS
 
-## Quick Start
-
-Install JAWA globally to use the CLI from anywhere:
-
-### 1. Create New Project
+## 🚀 Quick Start
 
 \`\`\`bash
 
-```bashnpm install -g jawa
+### 1️⃣ Create New Project
+
+**JMeter must be installed:**brew install jmeter
+
+```bash
 
 jawa init my-project\`\`\`
 
 cd my-project
 
-```### Local Installation
+``````bash
 
 
 
-Creates:Or install it locally in your project:
+**Generated structure:**# macOS### Linux
 
 ```
 
-my-project/\`\`\`bash
+my-project/brew install jmeterDownload from [Apache JMeter](https://jmeter.apache.org/download_jmeter.cgi) and add to PATH
 
-├── main.jmx              # JMeter test plannpm install jawa
+├── main.jmx              # JMeter test plan
 
-├── config/\`\`\`
+├── config/
 
 │   └── user.properties   # Test configuration
 
-├── reports/              # HTML reports (timestamped)## Quick Start
+├── reports/              # HTML reports (timestamped)# Linux/Windows### Windows
 
 ├── results/              # Test results (CSV)
 
-├── jmeter_logs/          # JMeter logs### 1. Create a New JMeter Project
+├── jmeter_logs/          # JMeter logs# Download from https://jmeter.apache.org/Download from [Apache JMeter](https://jmeter.apache.org/download_jmeter.cgi) and add to PATH
 
 ├── report-zips/          # Archived reports
 
-└── result-zips/          # Archived results\`\`\`bash
+└── result-zips/          # Archived results```
 
-```jawa init my-performance-tests
+```
 
-\`\`\`
+Verify installation:
 
-### 2. Run Test
+### 2️⃣ Run Test
 
-This will create a complete JMeter project with:
+Verify:\`\`\`bash
 
 ```bash
 
-jawa run --loop=1 --user=1 --ramp=1\`\`\`
+jawa run --loop=1 --user=1 --ramp=1```bashjmeter --version
 
-```my-performance-tests/
+```
 
-├── main.jmx                    # JMeter test plan
+jmeter --version\`\`\`
 
-**Parameters:**├── config/
+### 3️⃣ View Report
 
-- `--loop` - Loop count per user (default: 1)│   ├── user.properties         # User-defined test properties
+```
 
-- `--user` - Number of concurrent users (default: 1)│   ├── jmeter.properties       # JMeter configuration
+```bash
 
-- `--ramp` - Ramp-up period in seconds (default: 1)│   └── jawa.config.js          # JAWA framework config
+jawa report## Installation
 
-- `--heap` - JVM memory (default: 3g)├── tests/                      # Additional test scripts
-
-├── data/                       # CSV/JSON test data
-
-**Examples:**├── reports/                    # Test results and HTML reports
-
-```bash├── lib/                        # Custom libraries
-
-# Quick test├── package.json
-
-jawa run --loop=1 --user=1 --ramp=1└── README.md
-
-\`\`\`
-
-# Load test
-
-jawa run --loop=10 --user=50 --ramp=5### 2. Navigate to Your Project
-
-
-
-# Stress test with more memory\`\`\`bash
-
-jawa run --loop=20 --user=100 --ramp=10 --heap=4gcd my-performance-tests
-
-```\`\`\`
-
-
-
-### 3. View Report### 3. Run Your First Test
-
-
-
-```bashRun JMeter test (automatically generates HTML report):
-
-jawa report\`\`\`bash
-
-```npm test
-
-\`\`\`
-
-Opens the latest HTML report in your browser.
-
-This will:
-
----- Execute the JMeter test in non-GUI mode
-
-- Save results to `reports/results.jtl`
-
-## Commands- Automatically generate HTML dashboard at `reports/html/`
-
-- Show you the report location
-
-### `jawa init <project-name>`
-
-Initialize new JAWA project with JMeter test template.### 4. View HTML Report
-
-
-
-### `jawa run [options]`Open the generated HTML report in your browser:
-
-Run JMeter performance test.\`\`\`bash
-
-npm run report
-
-**Options:**\`\`\`
-
-- `-l, --loop <number>` - Loop count (default: 1)
-
-- `-u, --user <number>` - Number of users (default: 1)Or manually open: `reports/html/index.html`
-
-- `-r, --ramp <seconds>` - Ramp-up time (default: 1)
-
-- `-d, --duration <seconds>` - Test duration in seconds (default: 0 = loop-based)The report includes:
-
-- `--heap <memory>` - JVM heap memory (default: 3g)- 📊 Test statistics and graphs
-
-- `--base-url <url>` - Override base URL- ⏱️ Response times and throughput
-
-- `-g, --gui` - Open JMeter GUI- ✅ Success/failure rates
-
-- 📈 Over time graphs
-
-### `jawa report`- 🎯 Detailed metrics per request
-
-Open latest HTML report in browser.
-
-## Configuration
+```
 
 ---
 
-### User Properties (`config/user.properties`)
+Opens the latest HTML report in your browser.
 
-## Features
+### Global Installation (Recommended)
 
-Edit to customize test parameters:
+---
 
-✅ **Timestamped Reports** - Every run creates separate report folder  
+## Quick Start
 
-✅ **Auto ZIP Archives** - Results automatically compressed for sharing  \`\`\`properties
+## 📖 Commands
 
-✅ **Integrated Report Generation** - No separate steps, no hanging  # Target Configuration
+Install JAWA globally to use the CLI from anywhere:
 
-✅ **Cross-Platform** - Works on macOS, Windows, Linux  base.url=http://localhost:8080
+### `jawa init <project-name>`
 
-✅ **Dynamic Memory** - Configurable heap size for large tests  
+### 1. Create New Project
 
-✅ **Professional Output** - Clean console logs with progress tracking  # Load Configuration
-
-threads=10
-
----rampup=5
-
-duration=60
-
-## Output Structure
-
-# HTTP Configuration
-
-```http.connection.timeout=30000
-
-my-project/http.response.timeout=30000
-
-├── reports/\`\`\`
-
-│   ├── report-20241209-143022/    # HTML dashboard
-
-│   └── report-20241209-145530/### JMeter Test Plan (`main.jmx`)
-
-├── results/
-
-│   ├── result-20241209-143022/    # CSV resultsThe generated test plan includes:
-
-│   └── result-20241209-145530/- ✅ Configurable thread groups
-
-├── jmeter_logs/- ✅ HTTP request samplers
-
-│   └── jmeter-20241209-143022.log- ✅ Response assertions (status code)
-
-├── report-zips/                    # Shareable archives- ✅ Duration assertions (response time < 2s)
-
-│   └── report-20241209-143022.zip- ✅ Summary report listener
-
-└── result-zips/- ✅ Results tree listener
-
-    └── result-20241209-143022.zip
-
-```Edit `main.jmx` in JMeter GUI to customize:
+Initialize a new JAWA project with JMeter test template.
 
 \`\`\`bash
 
----npm run test:gui
+**Example:**
+
+```bash```bashnpm install -g jawa
+
+jawa init my-load-test
+
+```jawa init my-project\`\`\`
+
+
+
+---cd my-project
+
+
+
+### `jawa run [options]````### Local Installation
+
+
+
+Run JMeter performance test.
+
+
+
+**Options:**Creates:Or install it locally in your project:
+
+
+
+| Option | Description | Default |```
+
+|--------|-------------|---------|
+
+| `-l, --loop <number>` | Loop count per user | `1` |my-project/\`\`\`bash
+
+| `-u, --user <number>` | Number of concurrent users | `1` |
+
+| `-r, --ramp <seconds>` | Ramp-up period in seconds | `1` |├── main.jmx              # JMeter test plannpm install jawa
+
+| `-d, --duration <seconds>` | Test duration (0 = loop-based) | `0` |
+
+| `--heap <memory>` | JVM heap memory | `3g` |├── config/\`\`\`
+
+| `--base-url <url>` | Override base URL | `http://localhost:8080` |
+
+| `-g, --gui` | Open JMeter GUI | `false` |│   └── user.properties   # Test configuration
+
+| `-f, --file <path>` | Test file path | `main.jmx` |
+
+├── reports/              # HTML reports (timestamped)## Quick Start
+
+**Examples:**
+
+├── results/              # Test results (CSV)
+
+```bash
+
+# Quick test├── jmeter_logs/          # JMeter logs### 1. Create a New JMeter Project
+
+jawa run --loop=1 --user=1 --ramp=1
+
+├── report-zips/          # Archived reports
+
+# Load test
+
+jawa run --loop=10 --user=50 --ramp=5└── result-zips/          # Archived results\`\`\`bash
+
+
+
+# Stress test with more memory```jawa init my-performance-tests
+
+jawa run --loop=20 --user=100 --ramp=10 --heap=4g
 
 \`\`\`
 
+# Time-based test (run for 5 minutes)
+
+jawa run --user=20 --ramp=5 --duration=300### 2. Run Test
+
+
+
+# Custom base URLThis will create a complete JMeter project with:
+
+jawa run --loop=5 --user=10 --base-url=https://api.example.com
+
+``````bash
+
+
+
+---jawa run --loop=1 --user=1 --ramp=1\`\`\`
+
+
+
+### `jawa report````my-performance-tests/
+
+
+
+Open the latest HTML report in your browser.├── main.jmx                    # JMeter test plan
+
+
+
+**Example:****Parameters:**├── config/
+
+```bash
+
+jawa report- `--loop` - Loop count per user (default: 1)│   ├── user.properties         # User-defined test properties
+
+```
+
+- `--user` - Number of concurrent users (default: 1)│   ├── jmeter.properties       # JMeter configuration
+
+---
+
+- `--ramp` - Ramp-up period in seconds (default: 1)│   └── jawa.config.js          # JAWA framework config
+
+## 🎯 Features
+
+- `--heap` - JVM memory (default: 3g)├── tests/                      # Additional test scripts
+
+✅ **Timestamped Reports** - Every run creates a separate report folder  
+
+✅ **Auto ZIP Archives** - Results automatically compressed for sharing  ├── data/                       # CSV/JSON test data
+
+✅ **Integrated Report Generation** - No separate steps, no hanging  
+
+✅ **Cross-Platform** - Works on macOS, Windows, Linux  **Examples:**├── reports/                    # Test results and HTML reports
+
+✅ **Dynamic Memory** - Configurable heap size for large tests  
+
+✅ **Professional Output** - Clean console logs with progress tracking```bash├── lib/                        # Custom libraries
+
+
+
+---# Quick test├── package.json
+
+
+
+## 📁 Output Structurejawa run --loop=1 --user=1 --ramp=1└── README.md
+
+
+
+After running tests, your project will have:\`\`\`
+
+
+
+```# Load test
+
+my-project/
+
+├── reports/jawa run --loop=10 --user=50 --ramp=5### 2. Navigate to Your Project
+
+│   ├── report-20241209-143022/    # HTML dashboard
+
+│   └── report-20241209-145530/
+
+├── results/
+
+│   ├── result-20241209-143022/    # CSV results# Stress test with more memory\`\`\`bash
+
+│   └── result-20241209-145530/
+
+├── jmeter_logs/jawa run --loop=20 --user=100 --ramp=10 --heap=4gcd my-performance-tests
+
+│   └── jmeter-20241209-143022.log
+
+├── report-zips/                    # Shareable archives```\`\`\`
+
+│   └── report-20241209-143022.zip
+
+└── result-zips/
+
+    └── result-20241209-143022.zip
+
+```### 3. View Report### 3. Run Your First Test
+
+
+
+**Benefits:**
+
+- All reports are preserved (no overwriting)
+
+- ZIP files ready for sharing```bashRun JMeter test (automatically generates HTML report):
+
+- Timestamped for easy tracking
+
+jawa report\`\`\`bash
+
+---
+
+```npm test
+
+## 🔧 Configuration
+
+\`\`\`
+
+### Memory Sizing Guide
+
+Opens the latest HTML report in your browser.
+
+| Users | Recommended Heap |
+
+|-------|------------------|This will:
+
+| 1-10 | `--heap=1g` |
+
+| 10-50 | `--heap=2g` |---- Execute the JMeter test in non-GUI mode
+
+| 50-100 | `--heap=3g` (default) |
+
+| 100+ | `--heap=4g` or higher |- Save results to `reports/results.jtl`
+
+
+
+### Loop vs Duration## Commands- Automatically generate HTML dashboard at `reports/html/`
+
+
+
+**Loop-based (recommended for API tests):**- Show you the report location
+
+```bash
+
+jawa run --loop=10 --user=5### `jawa init <project-name>`
+
+```
+
+Initialize new JAWA project with JMeter test template.### 4. View HTML Report
+
+**Time-based (recommended for endurance tests):**
+
+```bash
+
+jawa run --duration=300 --user=10  # Run for 5 minutes
+
+```### `jawa run [options]`Open the generated HTML report in your browser:
+
+
+
+### Edit Test PlanRun JMeter performance test.\`\`\`bash
+
+
+
+Open JMeter GUI to customize your test:npm run report
+
+```bash
+
+jawa run --gui**Options:**\`\`\`
+
+```
+
+- `-l, --loop <number>` - Loop count (default: 1)
+
+Or edit `main.jmx` directly with any text editor.
+
+- `-u, --user <number>` - Number of users (default: 1)Or manually open: `reports/html/index.html`
+
+---
+
+- `-r, --ramp <seconds>` - Ramp-up time (default: 1)
+
+## 🛠️ Workflow
+
+- `-d, --duration <seconds>` - Test duration in seconds (default: 0 = loop-based)The report includes:
+
+```bash
+
+# 1. Create project- `--heap <memory>` - JVM heap memory (default: 3g)- 📊 Test statistics and graphs
+
+jawa init load-test
+
+cd load-test- `--base-url <url>` - Override base URL- ⏱️ Response times and throughput
+
+
+
+# 2. Edit test plan (optional)- `-g, --gui` - Open JMeter GUI- ✅ Success/failure rates
+
+jawa run --gui
+
+- 📈 Over time graphs
+
+# 3. Run test
+
+jawa run --loop=5 --user=10 --ramp=2### `jawa report`- 🎯 Detailed metrics per request
+
+
+
+# 4. View resultsOpen latest HTML report in browser.
+
+jawa report
+
+## Configuration
+
+# 5. Share results
+
+# Send: report-zips/report-TIMESTAMP.zip---
+
+```
+
+### User Properties (`config/user.properties`)
+
+---
+
+## Features
+
+## 🐛 Troubleshooting
+
+Edit to customize test parameters:
+
+### JMeter Not Found
+
+✅ **Timestamped Reports** - Every run creates separate report folder  
+
+```bash
+
+# Install JMeter first✅ **Auto ZIP Archives** - Results automatically compressed for sharing  \`\`\`properties
+
+brew install jmeter  # macOS
+
+```✅ **Integrated Report Generation** - No separate steps, no hanging  # Target Configuration
+
+
+
+### Out of Memory✅ **Cross-Platform** - Works on macOS, Windows, Linux  base.url=http://localhost:8080
+
+
+
+```bash✅ **Dynamic Memory** - Configurable heap size for large tests  
+
+# Increase heap size
+
+jawa run --heap=4g --loop=10 --user=50✅ **Professional Output** - Clean console logs with progress tracking  # Load Configuration
+
+```
+
+threads=10
+
+### Report Not Generated
+
+---rampup=5
+
+Check the log file:
+
+```bashduration=60
+
+cat jmeter_logs/jmeter-TIMESTAMP.log
+
+```## Output Structure
+
+
+
+### Test Fails to Start# HTTP Configuration
+
+
+
+Ensure `main.jmx` is valid:```http.connection.timeout=30000
+
+```bash
+
+jawa run --guimy-project/http.response.timeout=30000
+
+```
+
+├── reports/\`\`\`
+
+---
+
+│   ├── report-20241209-143022/    # HTML dashboard
+
+## 📚 Documentation
+
+│   └── report-20241209-145530/### JMeter Test Plan (`main.jmx`)
+
+- **Workflow Guide:** [NEW_WORKFLOW.md](./NEW_WORKFLOW.md)
+
+- **GitHub Issues:** [Report a bug](https://github.com/badrusalam11/jawa-framework/issues)├── results/
+
+- **GitHub Discussions:** [Ask questions](https://github.com/badrusalam11/jawa-framework/discussions)
+
+│   ├── result-20241209-143022/    # CSV resultsThe generated test plan includes:
+
+---
+
+│   └── result-20241209-145530/- ✅ Configurable thread groups
+
+## 🤝 Contributing
+
+├── jmeter_logs/- ✅ HTTP request samplers
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+│   └── jmeter-20241209-143022.log- ✅ Response assertions (status code)
+
+1. Fork the repository
+
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)├── report-zips/                    # Shareable archives- ✅ Duration assertions (response time < 2s)
+
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+
+4. Push to the branch (`git push origin feature/amazing-feature`)│   └── report-20241209-143022.zip- ✅ Summary report listener
+
+5. Open a Pull Request
+
+└── result-zips/- ✅ Results tree listener
+
+---
+
+    └── result-20241209-143022.zip
+
+## 📄 License
+
+```Edit `main.jmx` in JMeter GUI to customize:
+
+MIT © [badrusalam11](https://github.com/badrusalam11)
+
+\`\`\`bash
+
+---
+
+---npm run test:gui
+
+## ⭐ Support
+
+\`\`\`
+
+If you find JAWA helpful, please give it a star on [GitHub](https://github.com/badrusalam11/jawa-framework)!
+
 ## Workflow
 
+---
+
 ## HTML Dashboard Reports
+
+**Made with ❤️ for performance testers**
 
 ```bash
 
