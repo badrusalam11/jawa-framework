@@ -1,0 +1,35 @@
+# Node modules
+node_modules/
+
+# Environment variables
+.env.local
+.env.*.local
+
+# JMeter outputs
+reports/
+results/
+jmeter_logs/
+result-zips/
+report-zips/
+
+# JMeter temporary files
+*.jtl
+*.log
+
+# Test results
+result.csv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Backup files
+*.bak
+*.backup

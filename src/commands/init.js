@@ -36,7 +36,7 @@ async function initCommand(projectName, options) {
     }
 
     // Copy template files from templates directory
-    const templateDir = path.join(__dirname, '../../templates/basic');
+    const templateDir = path.join(__dirname, '../../templates');
     
     // Copy JMeter template files to new structure
     try {
@@ -75,6 +75,12 @@ async function initCommand(projectName, options) {
           await fs.copy(sampleDataSource, path.join(targetDir, 'data', 'dev', 'sample-data.csv'));
           await fs.copy(sampleDataSource, path.join(targetDir, 'data', 'prod', 'sample-data.csv'));
           await fs.copy(sampleDataSource, path.join(targetDir, 'data', 'uat', 'sample-data.csv'));
+        }
+        
+        // Copy .gitignore template
+        const gitignoreSource = path.join(templateDir, '.gitignore');
+        if (await fs.pathExists(gitignoreSource)) {
+          await fs.copy(gitignoreSource, path.join(targetDir, '.gitignore'));
         }
       }
     } catch (err) {
@@ -220,17 +226,6 @@ choco install jmeter
 `;
 
     await fs.writeFile(path.join(targetDir, 'README.md'), readmeContent);
-
-    // Create .gitignore
-    const gitignoreContent = `node_modules/
-reports/*
-!reports/.gitkeep
-*.log
-.DS_Store
-.env
-`;
-
-    await fs.writeFile(path.join(targetDir, '.gitignore'), gitignoreContent);
 
     // Create .gitkeep in reports directory
     await fs.writeFile(path.join(targetDir, 'reports', '.gitkeep'), '');
