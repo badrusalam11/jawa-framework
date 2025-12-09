@@ -22,7 +22,8 @@ program
 program
   .command('run')
   .description('Run JMeter test')
-  .option('-f, --file <path>', 'JMeter test file (.jmx)', 'main.jmx')
+  .option('-e, --env <environment>', 'Target environment (dev, prod, uat, etc)')
+  .option('-f, --file <path>', 'JMeter test file (.jmx)', 'plan/main.jmx')
   .option('-l, --loop <number>', 'Loop count for each thread', '1')
   .option('-u, --user <number>', 'Number of users (threads)', '1')
   .option('-r, --ramp <seconds>', 'Ramp-up period in seconds', '1')

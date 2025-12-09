@@ -4,6 +4,29 @@ const path = require('path');
 const fs = require('fs-extra');
 const archiver = require('archiver');
 
+// Function to load .env file
+function loadEnv() {
+  const envPath = path.join(process.cwd(), '.env');
+  if (!fs.existsSync(envPath)) {
+    return {};
+  }
+  
+  const envContent = fs.readFileSync(envPath, 'utf-8');
+  const envVars = {};
+  
+  envContent.split('\n').forEach(line => {
+    line = line.trim();
+    if (line && !line.startsWith('#')) {
+      const [key, ...valueParts] = line.split('=');
+      if (key) {
+        envVars[key.trim()] = valueParts.join('=').trim();
+      }
+    }
+  });
+  
+  return envVars;
+}
+
 async function createZipArchive(sourceDir, outputPath) {
   return new Promise(async (resolve, reject) => {
     try {
@@ -35,15 +58,29 @@ async function createZipArchive(sourceDir, outputPath) {
 }
 
 async function runCommand(options) {
-  // Parse options with new naming convention
-  const jmxFile = options.file || 'main.jmx';
-  const loopCount = parseInt(options.loop) || 1;
-  const threadCount = parseInt(options.user) || 1;
-  const rampUp = parseInt(options.ramp) || 1;
-  const duration = parseInt(options.duration) || 0;
-  const baseUrl = options.baseUrl || 'http://localhost:8080';
+  // Load .env file
+  const envVars = loadEnv();
+  
+  // Get environment from --env flag or .env file, default to 'dev'
+  const targetEnv = options.env || envVars.TARGET_ENV || 'dev';
+  
+  // Debug: Show where environment came from
+  let envSource = 'default';
+  if (options.env) {
+    envSource = '--env flag';
+  } else if (envVars.TARGET_ENV) {
+    envSource = '.env file';
+  }
+  
+  // Parse options with new naming convention (with .env fallback)
+  const jmxFile = options.file || path.join('plan', 'main.jmx');
+  const loopCount = parseInt(options.loop || envVars.LOOP) || 1;
+  const threadCount = parseInt(options.user || envVars.THREADS) || 1;
+  const rampUp = parseInt(options.ramp || envVars.RAMPUP) || 1;
+  const duration = parseInt(options.duration || envVars.DURATION) || 0;
+  const baseUrl = options.baseUrl || envVars.BASE_URL || 'http://localhost:8080';
   const gui = options.gui || false;
-  const heapSize = options.heap || '3g';
+  const heapSize = options.heap || envVars.HEAP_SIZE || '3g';
   
   // Generate timestamp for this run (format: YYYYMMDD-HHMMSS)
   const now = new Date();
@@ -87,6 +124,7 @@ async function runCommand(options) {
   console.log(chalk.blue('\n🚀 JAWA Performance Test Runner\n'));
   console.log(chalk.gray('═'.repeat(50)));
   console.log(chalk.cyan('Configuration:'));
+  console.log(chalk.gray(`  Environment   : ${targetEnv} ${chalk.yellow(`(from ${envSource})`)}`));
   console.log(chalk.gray(`  Test File     : ${jmxFile}`));
   console.log(chalk.gray(`  Users         : ${threadCount}`));
   console.log(chalk.gray(`  Ramp-up       : ${rampUp}s`));
@@ -124,17 +162,38 @@ async function runCommand(options) {
     '-o', reportDir,
     '-f', // Force overwrite report directory
     `-JresultTimestamp=${timestamp}`,
-    `-Jthreads=${threadCount}`,
-    `-Jrampup=${rampUp}`,
-    `-Jloop=${loopCount}`,
-    `-Jduration=${effectiveDuration}`,
+    `-JtargetEnv=${targetEnv}`,
+    `-JthreadTargetNumber=${threadCount}`,
+    `-JthreadRampUpPeriod=${rampUp}`,
+    `-JthreadLoopCount=${loopCount}`,
+    `-JthreadLifetimeDuration=${effectiveDuration}`,
     `-Jbase.url=${baseUrl}`
   ];
 
-  // Add user.properties if exists
-  if (await fs.pathExists('user.properties')) {
-    jmeterArgs.push('-q', 'user.properties');
+  // Add environment-specific user.properties if exists
+  const envUserProps = path.join('prop', targetEnv, 'user.properties');
+  if (await fs.pathExists(envUserProps)) {
+    jmeterArgs.push('-q', envUserProps);
+    console.log(chalk.gray(`  ℹ️  Loading properties: ${envUserProps}`));
+  } else {
+    console.log(chalk.yellow(`  ⚠️  Properties not found: ${envUserProps}`));
+    // Fallback to root user.properties (backward compatibility)
+    if (await fs.pathExists('user.properties')) {
+      jmeterArgs.push('-q', 'user.properties');
+      console.log(chalk.gray(`  ℹ️  Using fallback: user.properties`));
+    } else {
+      console.log(chalk.yellow(`  ⚠️  No properties file found! Using JMeter defaults.`));
+    }
   }
+  
+  // Add environment-specific jmeter.properties if exists
+  const envJMeterProps = path.join('prop', targetEnv, 'jmeter.properties');
+  if (await fs.pathExists(envJMeterProps)) {
+    jmeterArgs.push('-q', envJMeterProps);
+    console.log(chalk.gray(`  ℹ️  Loading JMeter config: ${envJMeterProps}`));
+  }
+  
+  console.log();
 
   // Check if JMeter is installed (cross-platform)
   const checkCmd = process.platform === 'win32' ? 'where' : 'which';
@@ -160,6 +219,11 @@ async function runCommand(options) {
   }
 
   console.log(chalk.blue('⚡ Running test with dynamic report generation...\n'));
+
+  // Debug: Print full JMeter command
+  console.log(chalk.yellow('🐛 Debug - JMeter Command:'));
+  console.log(chalk.gray(`  ${jmeterCmd} ${jmeterArgs.join(' ')}`));
+  console.log(chalk.gray('═'.repeat(50) + '\n'));
 
   // Prepare environment with HEAP settings
   const env = { ...process.env };

@@ -17,13 +17,18 @@ async function initCommand(projectName, options) {
     // Create project directory
     await fs.ensureDir(targetDir);
 
-    // Create directory structure
+    // Create directory structure - new structure for environment-based testing
     const dirs = [
-      'tests',
-      'config',
-      'reports',
-      'data',
-      'lib'
+      'plan',                    // JMX test plans
+      'prop/dev',               // Properties for dev environment
+      'prop/prod',              // Properties for prod environment
+      'prop/uat',               // Properties for uat environment
+      'data/dev',               // CSV data for dev environment
+      'data/prod',              // CSV data for prod environment
+      'data/uat',               // CSV data for uat environment
+      'reports',                // Test reports
+      'results',                // Test results
+      'lib'                     // Custom JMeter plugins/libraries
     ];
 
     for (const dir of dirs) {
@@ -33,25 +38,43 @@ async function initCommand(projectName, options) {
     // Copy template files from templates directory
     const templateDir = path.join(__dirname, '../../templates/basic');
     
-    // Copy JMeter template files
+    // Copy JMeter template files to new structure
     try {
       if (await fs.pathExists(templateDir)) {
-        // Copy main.jmx
+        // Copy main.jmx to plan/
         const jmxSource = path.join(templateDir, 'main.jmx');
         if (await fs.pathExists(jmxSource)) {
-          await fs.copy(jmxSource, path.join(targetDir, 'main.jmx'));
+          await fs.copy(jmxSource, path.join(targetDir, 'plan', 'main.jmx'));
         }
         
-        // Copy user.properties
+        // Copy user.properties to each environment folder
         const userPropsSource = path.join(templateDir, 'user.properties');
         if (await fs.pathExists(userPropsSource)) {
-          await fs.copy(userPropsSource, path.join(targetDir, 'config', 'user.properties'));
+          await fs.copy(userPropsSource, path.join(targetDir, 'prop', 'dev', 'user.properties'));
+          await fs.copy(userPropsSource, path.join(targetDir, 'prop', 'prod', 'user.properties'));
+          await fs.copy(userPropsSource, path.join(targetDir, 'prop', 'uat', 'user.properties'));
         }
         
-        // Copy jmeter.properties
+        // Copy jmeter.properties to each environment folder
         const jmeterPropsSource = path.join(templateDir, 'jmeter.properties');
         if (await fs.pathExists(jmeterPropsSource)) {
-          await fs.copy(jmeterPropsSource, path.join(targetDir, 'config', 'jmeter.properties'));
+          await fs.copy(jmeterPropsSource, path.join(targetDir, 'prop', 'dev', 'jmeter.properties'));
+          await fs.copy(jmeterPropsSource, path.join(targetDir, 'prop', 'prod', 'jmeter.properties'));
+          await fs.copy(jmeterPropsSource, path.join(targetDir, 'prop', 'uat', 'jmeter.properties'));
+        }
+        
+        // Copy .env template
+        const envSource = path.join(templateDir, '.env');
+        if (await fs.pathExists(envSource)) {
+          await fs.copy(envSource, path.join(targetDir, '.env'));
+        }
+        
+        // Copy sample data to each environment folder
+        const sampleDataSource = path.join(templateDir, 'sample-data.csv');
+        if (await fs.pathExists(sampleDataSource)) {
+          await fs.copy(sampleDataSource, path.join(targetDir, 'data', 'dev', 'sample-data.csv'));
+          await fs.copy(sampleDataSource, path.join(targetDir, 'data', 'prod', 'sample-data.csv'));
+          await fs.copy(sampleDataSource, path.join(targetDir, 'data', 'uat', 'sample-data.csv'));
         }
       }
     } catch (err) {
@@ -65,12 +88,14 @@ async function initCommand(projectName, options) {
       description: `JAWA performance testing project: ${projectName}`,
       main: 'index.js',
       scripts: {
-        test: 'jawa run',
-        'test:gui': 'jmeter -t main.jmx',
-        'test:custom': 'jawa run -t 50 -r 10 -d 300',
+        'test': 'jawa run',
+        'test:dev': 'jawa run --env=dev',
+        'test:prod': 'jawa run --env=prod',
+        'test:uat': 'jawa run --env=uat',
+        'test:gui': 'jmeter -t plan/main.jmx',
+        'test:load': 'jawa run --loop=10 --user=50 --ramp=10',
         'report': 'jawa report',
-        'report:generate': 'jmeter -g reports/results.jtl -o reports/html && jawa report',
-        'clean': 'rm -rf reports/results.jtl reports/html'
+        'clean': 'rm -rf reports/* results/*'
       },
       dependencies: {
         jawa: `^${require('../../package.json').version}`
@@ -79,260 +104,119 @@ async function initCommand(projectName, options) {
 
     await fs.writeJson(path.join(targetDir, 'package.json'), projectPackageJson, { spaces: 2 });
 
-    // Create jawa.config.js
-    const configContent = `module.exports = {
-  // JAWA Framework Configuration
-  projectName: '${projectName}',
-  
-  // Test execution settings
-  execution: {
-    threads: 10,
-    rampUp: 5,
-    duration: 60,
-    iterations: 100
-  },
-  
-  // Target server configuration
-  target: {
-    host: 'http://localhost',
-    port: 8080,
-    protocol: 'http'
-  },
-  
-  // Reporting settings
-  reporting: {
-    format: ['html', 'json', 'csv'],
-    outputDir: './reports'
-  },
-  
-  // Data files
-  data: {
-    csvDataSets: [],
-    jsonDataSets: []
-  },
-  
-  // Assertions
-  assertions: {
-    maxResponseTime: 2000,
-    minThroughput: 100,
-    errorRate: 0.01
-  }
-};
-`;
-
-    await fs.writeFile(path.join(targetDir, 'config', 'jawa.config.js'), configContent);
-
-    // Create sample test file
-    const testContent = `const { TestPlan, ThreadGroup, HTTPSampler } = require('jawa');
-
-/**
- * Sample JAWA Test
- * This is a basic example of a performance test using JAWA framework
- */
-
-class SampleTest {
-  constructor(config) {
-    this.config = config;
-  }
-
-  async setup() {
-    console.log('Setting up test...');
-    // Add your setup logic here
-  }
-
-  async execute() {
-    console.log('Executing test...');
-    
-    // Example: HTTP GET request
-    const response = await this.makeRequest({
-      method: 'GET',
-      url: \`\${this.config.target.host}:\${this.config.target.port}/api/health\`,
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    });
-
-    // Validate response
-    this.validateResponse(response);
-  }
-
-  async makeRequest(options) {
-    // Simulate HTTP request
-    return {
-      statusCode: 200,
-      responseTime: Math.random() * 1000,
-      body: { status: 'ok' }
-    };
-  }
-
-  validateResponse(response) {
-    if (response.statusCode !== 200) {
-      throw new Error(\`Expected status 200, got \${response.statusCode}\`);
-    }
-    
-    if (response.responseTime > this.config.assertions.maxResponseTime) {
-      console.warn(\`Response time \${response.responseTime}ms exceeds threshold\`);
-    }
-  }
-
-  async teardown() {
-    console.log('Tearing down test...');
-    // Add your cleanup logic here
-  }
-
-  async run() {
-    try {
-      await this.setup();
-      await this.execute();
-      await this.teardown();
-      console.log('Test completed successfully! ✅');
-    } catch (error) {
-      console.error('Test failed:', error.message);
-      process.exit(1);
-    }
-  }
-}
-
-// Load config and run test
-const config = require('../config/jawa.config');
-const test = new SampleTest(config);
-test.run();
-`;
-
-    await fs.writeFile(path.join(targetDir, 'tests', 'sample.test.js'), testContent);
-
     // Create README for the project
     const readmeContent = `# ${projectName}
 
-A JAWA Framework Performance Testing Project
+JAWA Framework - Performance Testing Project
 
-## Getting Started
+## 🚀 Quick Start
 
-### Prerequisites
+### 1. Configure Environment
 
-Make sure you have JMeter installed on your system:
-
-**macOS:**
+Edit \`.env\` file:
 \`\`\`bash
-brew install jmeter
+TARGET_ENV=dev
+BASE_URL=http://localhost:8080
+THREADS=1
+RAMPUP=1
+LOOP=1
 \`\`\`
 
-**Linux:**
-\`\`\`bash
-# Download from https://jmeter.apache.org/download_jmeter.cgi
-# Extract and add to PATH
-\`\`\`
-
-**Windows:**
-Download from https://jmeter.apache.org/download_jmeter.cgi
-
-### Install Dependencies
+### 2. Run Test
 
 \`\`\`bash
-npm install
-\`\`\`
-
-## Running Tests
-
-### Run Tests in Non-GUI Mode (Recommended for Load Testing)
-
-\`\`\`bash
+# Use default environment (from .env)
 npm test
+
+# Or specify environment
+npm run test:dev
+npm run test:prod
+npm run test:uat
 \`\`\`
 
-This runs: \`jmeter -n -t main.jmx -l reports/results.jtl\`
-
-### Run Tests with Custom Properties
-
-\`\`\`bash
-npm run test:custom
-\`\`\`
-
-### Open JMeter GUI
-
-\`\`\`bash
-npm run test:gui
-\`\`\`
-
-### Generate HTML Report
-
-After running tests, generate an HTML dashboard report:
+### 3. View Report
 
 \`\`\`bash
 npm run report
 \`\`\`
 
-The report will be available at \`reports/html/index.html\`
-
-### Custom Test Execution
-
-Run with custom parameters:
-
-\`\`\`bash
-jmeter -n -t main.jmx -Jthreads=50 -Jrampup=10 -Jduration=300 -Jbase.url=https://example.com -l reports/results.jtl
-\`\`\`
-
-## Project Structure
+## 📁 Project Structure
 
 \`\`\`
 ${projectName}/
-├── main.jmx                    # Main JMeter test plan
-├── config/
-│   ├── user.properties         # User-defined properties
-│   ├── jmeter.properties       # JMeter configuration
-│   └── jawa.config.js          # JAWA framework config
-├── tests/                      # Additional test scripts
-├── data/                       # Test data files (CSV, JSON)
-├── reports/                    # Test reports and results
-│   ├── results.jtl            # Test results file
-│   └── html/                  # HTML dashboard reports
-├── lib/                        # Custom libraries and utilities
-└── package.json
+├── .env                    # Environment configuration
+├── plan/
+│   └── main.jmx           # JMeter test plan
+├── prop/
+│   ├── dev/               # Dev environment properties
+│   ├── prod/              # Production properties
+│   └── uat/               # UAT properties
+├── data/
+│   ├── dev/               # Dev test data (CSV)
+│   ├── prod/              # Prod test data
+│   └── uat/               # UAT test data
+├── reports/               # HTML reports (timestamped)
+├── results/               # Test results (timestamped)
+└── lib/                   # Custom JMeter plugins
 \`\`\`
 
-## Configuration
+## 🎯 Running Tests
 
-### JMeter Properties
+\`\`\`bash
+# Development environment
+jawa run --env=dev --loop=1 --user=1 --ramp=1
 
-Edit \`config/user.properties\` to configure:
-- \`base.url\` - Target server URL
-- \`threads\` - Number of virtual users
-- \`rampup\` - Ramp-up time in seconds
-- \`duration\` - Test duration in seconds
+# Production load test
+jawa run --env=prod --loop=10 --user=50 --ramp=10
 
-### Test Plan
+# UAT testing
+jawa run --env=uat --loop=5 --user=20 --ramp=5
 
-Edit \`main.jmx\` in JMeter GUI to:
-- Add/modify HTTP requests
-- Configure thread groups
-- Add assertions and timers
-- Set up listeners and reports
+# Open JMeter GUI
+jawa run --gui
+\`\`\`
 
-## JMeter Test Plan Details
+## ⚙️ Configuration
 
-The generated \`main.jmx\` includes:
+### Environment Properties
 
-- **Test Plan** with user-defined variables
-- **Thread Group** with configurable threads, ramp-up, and duration
-- **HTTP Request** sampler (Health Check example)
-- **Response Assertion** to validate HTTP status code
-- **Duration Assertion** to ensure response time is under 2 seconds
-- **Results Tree Listener** for detailed results
-- **Summary Report** for aggregated metrics
+Edit properties per environment:
+- \`prop/dev/user.properties\` - Dev settings
+- \`prop/prod/user.properties\` - Production settings
+- \`prop/uat/user.properties\` - UAT settings
 
-## Tips
+### Test Data
 
-1. **Always use Non-GUI mode for actual load testing** - GUI mode is for test development only
-2. **Monitor your test results** - Use Summary Report and HTML Dashboard
-3. **Tune your test parameters** - Start with small loads and gradually increase
-4. **Use CSV Data Sets** - Place CSV files in \`data/\` folder for parameterization
-5. **Clean old results** - Remove old .jtl files before new test runs
+Add CSV files to:
+- \`data/dev/\` - Development data
+- \`data/prod/\` - Production data
+- \`data/uat/\` - UAT data
 
-## Documentation
+## 📊 Reports
 
-For more information:
-- [JMeter Documentation](https://jmeter.apache.org/usermanual/index.html)
-- [JAWA Framework](https://github.com/yourusername/jawa-framework)
+Reports are timestamped and auto-generated:
+- HTML reports: \`reports/report-YYYYMMDD-HHMMSS/\`
+- ZIP archives: \`report-zips/report-YYYYMMDD-HHMMSS.zip\`
+- Results: \`results/result-YYYYMMDD-HHMMSS/\`
+
+## 🔧 Prerequisites
+
+Install JMeter:
+\`\`\`bash
+# macOS
+brew install jmeter
+
+# Linux
+sudo apt install jmeter
+
+# Windows
+choco install jmeter
+\`\`\`
+
+## 📚 Documentation
+
+- [JAWA Framework](https://github.com/badrusalam11/jawa-framework)
+- [JMeter Documentation](https://jmeter.apache.org/)
 `;
 
     await fs.writeFile(path.join(targetDir, 'README.md'), readmeContent);
@@ -353,25 +237,27 @@ reports/*
 
     // Success message
     console.log(chalk.green('✅ Project created successfully!\n'));
-    console.log(chalk.cyan('📦 Project includes:\n'));
-    console.log('  ✓ main.jmx - JMeter test plan');
-    console.log('  ✓ user.properties - Test configuration');
-    if (options.template === 'lightweight') {
-      console.log(chalk.green('  ✓ Optimized for FAST report generation (90% smaller files!)'));
-    }
-    console.log('  ✓ jmeter.properties - JMeter settings');
-    console.log('  ✓ Sample test structure\n');
+    console.log(chalk.cyan('📦 Project structure:\n'));
+    console.log('  ✓ plan/main.jmx - JMeter test plan');
+    console.log('  ✓ prop/dev/ - Development properties');
+    console.log('  ✓ prop/prod/ - Production properties');
+    console.log('  ✓ prop/uat/ - UAT properties');
+    console.log('  ✓ data/[env]/ - Test data per environment');
+    console.log('  ✓ .env - Environment configuration\n');
     console.log(chalk.cyan('Next steps:\n'));
     console.log(`  cd ${projectName}`);
-    console.log(`  npm test          ${chalk.gray('# Run test + auto-generate HTML report')}`);
-    console.log(`  npm run report    ${chalk.gray('# Open HTML report in browser')}`);
-    console.log(`  npm run test:gui  ${chalk.gray('# Open JMeter GUI to edit test')}\n`);
-    console.log(chalk.cyan('📊 After running test, HTML report will be at:'));
-    console.log(chalk.gray(`  ${projectName}/reports/html/index.html\n`));
-    console.log(chalk.yellow('⚠️  Make sure JMeter is installed on your system!'));
+    console.log(`  jawa run --env=dev --loop=1 --user=1 --ramp=1  ${chalk.gray('# Quick test')}`);
+    console.log(`  jawa run --env=prod --loop=10 --user=50        ${chalk.gray('# Load test')}`);
+    console.log(`  jawa report                                    ${chalk.gray('# View report')}\n`);
+    console.log(chalk.cyan('📊 Environment-based testing:'));
+    console.log(chalk.gray('  • Edit .env to set TARGET_ENV (dev/prod/uat)'));
+    console.log(chalk.gray('  • Customize prop/[env]/user.properties per environment'));
+    console.log(chalk.gray('  • Add test data to data/[env]/ folders\n'));
+    console.log(chalk.yellow('⚠️  Make sure JMeter is installed!'));
     console.log(chalk.gray('   macOS: brew install jmeter'));
-    console.log(chalk.gray('   Or download from: https://jmeter.apache.org/\n'));
-    console.log(chalk.green('Happy testing! 🎯\n'));
+    console.log(chalk.gray('   Linux: sudo apt install jmeter'));
+    console.log(chalk.gray('   Or: https://jmeter.apache.org/\n'));
+    console.log(chalk.green('Happy testing! 🚀\n'));
 
   } catch (error) {
     console.error(chalk.red('Error creating project:'), error.message);

@@ -53,23 +53,52 @@ cd my-project
 Generated structure:
 ```
 my-project/
-├── main.jmx              # JMeter test plan
-├── config/
-│   └── user.properties   # Test configuration
-├── reports/              # HTML reports (timestamped)
-├── results/              # Test results (CSV)
-├── jmeter_logs/          # JMeter logs
-├── report-zips/          # Archived reports
-└── result-zips/          # Archived results
+├── .env                     # Environment configuration
+├── plan/
+│   └── main.jmx            # JMeter test plan
+├── prop/
+│   ├── dev/                # Dev environment properties
+│   │   ├── user.properties
+│   │   └── jmeter.properties
+│   ├── prod/               # Production environment properties
+│   │   ├── user.properties
+│   │   └── jmeter.properties
+│   └── uat/                # UAT environment properties
+│       ├── user.properties
+│       └── jmeter.properties
+├── data/
+│   ├── dev/                # Dev test data (CSV files)
+│   ├── prod/               # Prod test data (CSV files)
+│   └── uat/                # UAT test data (CSV files)
+├── reports/                # HTML reports (timestamped)
+├── results/                # Test results (timestamped)
+└── lib/                    # Custom JMeter plugins
 ```
 
-### 2️⃣ Run Test
+### 2️⃣ Configure Environment
+
+Edit `.env` file to set target environment:
+```bash
+TARGET_ENV=dev
+BASE_URL=http://localhost:8080
+THREADS=1
+RAMPUP=1
+LOOP=1
+```
+
+Or customize properties per environment in `prop/dev/`, `prop/prod/`, etc.
+
+### 3️⃣ Run Test
 
 ```bash
+# Use environment from .env file
 jawa run --loop=1 --user=1 --ramp=1
+
+# Override environment via command line
+jawa run --env=prod --loop=10 --user=50 --ramp=10
 ```
 
-### 3️⃣ View Report
+### 4️⃣ View Report
 
 ```bash
 jawa report
@@ -83,11 +112,13 @@ Opens the latest HTML report in your browser.
 
 ### jawa init
 
-Initialize a new JAWA project with JMeter test template.
+Initialize a new JAWA project with environment-based structure.
 
 ```bash
 jawa init my-load-test
 ```
+
+Creates project with `plan/`, `prop/[env]/`, and `data/[env]/` folders.
 
 ### jawa run
 
@@ -97,25 +128,29 @@ Run JMeter performance test.
 
 | Option | Description | Default |
 |--------|-------------|---------|
+| -e, --env | Target environment (dev/prod/uat) | dev |
 | -l, --loop | Loop count per user | 1 |
 | -u, --user | Number of concurrent users | 1 |
 | -r, --ramp | Ramp-up period in seconds | 1 |
 | -d, --duration | Test duration (0 = loop-based) | 0 |
 | --heap | JVM heap memory | 3g |
-| --base-url | Override base URL | http://localhost:8080 |
+| --base-url | Override base URL | - |
 | -g, --gui | Open JMeter GUI | false |
-| -f, --file | Test file path | main.jmx |
+| -f, --file | Test file path | plan/main.jmx |
 
 **Examples:**
 ```bash
-# Quick test
+# Quick test on dev
 jawa run --loop=1 --user=1 --ramp=1
 
-# Load test
-jawa run --loop=10 --user=50 --ramp=5
+# Load test on production
+jawa run --env=prod --loop=10 --user=50 --ramp=5
 
-# Stress test with more memory
-jawa run --loop=20 --user=100 --ramp=10 --heap=4g
+# Stress test on UAT with more memory
+jawa run --env=uat --loop=20 --user=100 --ramp=10 --heap=4g
+
+# Use environment from .env file
+jawa run --loop=5 --user=10
 
 # Time-based test (run for 5 minutes)
 jawa run --user=20 --ramp=5 --duration=300
