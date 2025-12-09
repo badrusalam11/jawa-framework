@@ -1,5 +1,5 @@
 {
-  "name": "jawa",
+  "name": "jawa-framework",
   "version": "1.0.0",
   "description": "JavaScript Apache Wrapper for JMeter - Performance testing CLI tool",
   "main": "src/index.js",
