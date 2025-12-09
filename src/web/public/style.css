@@ -8,38 +8,102 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   background: #f5f5f5;
   min-height: 100vh;
-  padding: 20px;
+  margin: 0;
+  padding: 0;
   color: #333;
 }
 
 .container {
-  max-width: 800px;
-  margin: 0 auto;
-  background: white;
-  border-radius: 16px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-  overflow: hidden;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
 header {
   background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
   color: white;
-  padding: 30px;
-  text-align: center;
+  padding: 20px 40px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
-header h1 {
-  font-size: 2rem;
-  margin-bottom: 8px;
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
 }
 
-header .subtitle {
+.header-left h1 {
+  font-size: 1.8rem;
+  margin: 0;
+}
+
+.header-stats {
+  display: flex;
+  gap: 30px;
+  flex: 1;
+  justify-content: center;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.stat-label {
+  font-size: 0.75rem;
   opacity: 0.8;
-  font-size: 0.95rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.stat-value {
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-top: 4px;
+}
+
+.header-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.btn-action {
+  padding: 10px 20px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-transform: uppercase;
+}
+
+.btn-stop {
+  background: #d32f2f;
+  color: white;
+}
+
+.btn-stop:hover {
+  background: #b71c1c;
+}
+
+.btn-reset {
+  background: #ff9800;
+  color: white;
+}
+
+.btn-reset:hover {
+  background: #f57c00;
 }
 
 main {
-  padding: 30px;
+  flex: 1;
+  max-width: 1400px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 30px 40px;
 }
 
 .loading {
@@ -255,7 +319,12 @@ main {
 
 .status-box.success {
   background: #f0fdf4;
-  border: 2px solid #86efac;
+  border: 2px solid #4ade80;
+  color: #166534;
+}
+
+.status-box.success h2 {
+  color: #15803d;
 }
 
 .status-box.error {
@@ -291,9 +360,187 @@ main {
   margin-top: 20px;
 }
 
+/* Tabs */
+.tabs {
+  display: flex;
+  background: #f5f5f5;
+  border-bottom: 2px solid #e0e0e0;
+  padding: 0;
+  margin: 0;
+}
+
+.tab-btn {
+  flex: 1;
+  padding: 15px 20px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #666;
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.tab-btn:hover {
+  background: #eeeeee;
+  color: #333;
+}
+
+.tab-btn.active {
+  color: #ff6b6b;
+  border-bottom-color: #ff6b6b;
+  background: white;
+}
+
+.tab-content {
+  padding: 0;
+}
+
+.tab-panel {
+  display: none;
+  padding: 30px;
+}
+
+.tab-panel.active {
+  display: block;
+}
+
+/* Tables */
+.table-container {
+  overflow-x: auto;
+  background: white;
+}
+
+.stats-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.stats-table thead {
+  background: #f5f5f5;
+  position: sticky;
+  top: 0;
+}
+
+.stats-table th {
+  padding: 12px 16px;
+  text-align: left;
+  font-weight: 600;
+  color: #333;
+  border-bottom: 2px solid #e0e0e0;
+  white-space: nowrap;
+}
+
+.stats-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid #f0f0f0;
+  white-space: nowrap;
+}
+
+.stats-table tbody tr:hover {
+  background: #f9f9f9;
+}
+
+.stats-table .no-data {
+  text-align: center;
+  color: #999;
+  padding: 40px;
+  font-style: italic;
+}
+
+.stats-table tr.aggregated {
+  background: #f5f5f5;
+  font-weight: 600;
+}
+
+/* Charts */
+.charts-container {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.chart-box {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+}
+
+.chart-box h3 {
+  margin: 0 0 20px 0;
+  font-size: 1.1rem;
+  color: #333;
+}
+
+.chart-box canvas {
+  max-width: 100%;
+}
+
+/* Download Section */
+.download-section {
+  background: white;
+  padding: 30px;
+}
+
+.download-section h3 {
+  margin: 0 0 10px 0;
+  font-size: 1.3rem;
+}
+
+.download-buttons {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 15px;
+  margin-top: 25px;
+}
+
+.btn-download {
+  padding: 15px 20px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: white;
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: left;
+}
+
+.btn-download:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(255, 107, 107, 0.3);
+}
+
+.btn-download:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  transform: none;
+}
+
 @media (max-width: 640px) {
-  header h1 {
-    font-size: 1.5rem;
+  .header-content {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .header-stats {
+    flex-wrap: wrap;
+    gap: 15px;
+  }
+  
+  .tabs {
+    flex-wrap: wrap;
+  }
+  
+  .tab-btn {
+    flex: 1 1 auto;
+    min-width: 120px;
   }
   
   main {
@@ -307,5 +554,9 @@ main {
   .radio-group {
     flex-direction: column;
     gap: 12px;
+  }
+  
+  .download-buttons {
+    grid-template-columns: 1fr;
   }
 }

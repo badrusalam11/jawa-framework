@@ -5,12 +5,38 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>JAWA Performance Test Runner</title>
   <link rel="stylesheet" href="/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body>
   <div class="container">
     <header>
-      <h1>🚀 JAWA Performance Test Runner</h1>
-      <p class="subtitle">Configure and run your JMeter tests</p>
+      <div class="header-content">
+        <div class="header-left">
+          <h1>🚀 JAWA</h1>
+        </div>
+        <div class="header-stats" id="headerStats" style="display: none;">
+          <div class="stat-item">
+            <span class="stat-label">Status</span>
+            <span class="stat-value" id="statusValue">READY</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Users</span>
+            <span class="stat-value" id="usersValue">0</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">RPS</span>
+            <span class="stat-value" id="rpsValue">0</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Failures</span>
+            <span class="stat-value" id="failuresValue">0%</span>
+          </div>
+        </div>
+        <div class="header-actions" id="headerActions" style="display: none;">
+          <button class="btn-action btn-stop" id="stopBtn">⏹ STOP</button>
+          <button class="btn-action btn-reset" id="resetBtn">🔄 RESET</button>
+        </div>
+      </div>
     </header>
 
     <main id="app">
@@ -92,15 +118,134 @@
         </div>
       </form>
 
-      <!-- Test Running Status -->
-      <div id="testRunning" style="display: none;">
-        <div class="status-box success">
-          <h2>✅ Test Started Successfully!</h2>
-          <p>Your test is running in the background. Check the terminal for real-time progress.</p>
-          <p class="status-info">Report will be generated at: <code id="reportPath"></code></p>
-          <button type="button" id="backBtn" class="btn-secondary">
-            ← Back to Form
-          </button>
+      <!-- Test Monitoring (Locust-style) -->
+      <div id="testMonitoring" style="display: none;">
+        <!-- Tabs Navigation -->
+        <div class="tabs">
+          <button class="tab-btn active" data-tab="statistics">STATISTICS</button>
+          <button class="tab-btn" data-tab="charts">CHARTS</button>
+          <button class="tab-btn" data-tab="failures">FAILURES</button>
+          <button class="tab-btn" data-tab="exceptions">EXCEPTIONS</button>
+          <button class="tab-btn" data-tab="download">DOWNLOAD DATA</button>
+        </div>
+
+        <!-- Tab Content -->
+        <div class="tab-content">
+          <!-- Statistics Tab -->
+          <div id="statisticsTab" class="tab-panel active">
+            <div class="table-container">
+              <table class="stats-table">
+                <thead>
+                  <tr>
+                    <th>Type</th>
+                    <th>Name</th>
+                    <th># Requests</th>
+                    <th># Fails</th>
+                    <th>Median (ms)</th>
+                    <th>95%ile (ms)</th>
+                    <th>99%ile (ms)</th>
+                    <th>Average (ms)</th>
+                    <th>Min (ms)</th>
+                    <th>Max (ms)</th>
+                    <th>Avg Size (bytes)</th>
+                    <th>Current RPS</th>
+                    <th>Current Failures/s</th>
+                  </tr>
+                </thead>
+                <tbody id="statsTableBody">
+                  <tr>
+                    <td colspan="13" class="no-data">No data yet. Start a test to see statistics.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Charts Tab -->
+          <div id="chartsTab" class="tab-panel">
+            <div class="charts-container">
+              <div class="chart-box">
+                <h3>Total Requests per Second</h3>
+                <canvas id="rpsChart" width="800" height="300"></canvas>
+              </div>
+              <div class="chart-box">
+                <h3>Response Times (ms)</h3>
+                <canvas id="responseTimeChart" width="800" height="300"></canvas>
+              </div>
+              <div class="chart-box">
+                <h3>Number of Users</h3>
+                <canvas id="usersChart" width="800" height="300"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- Failures Tab -->
+          <div id="failuresTab" class="tab-panel">
+            <div class="table-container">
+              <table class="stats-table">
+                <thead>
+                  <tr>
+                    <th>Method</th>
+                    <th>Name</th>
+                    <th># Failures</th>
+                    <th>Error</th>
+                  </tr>
+                </thead>
+                <tbody id="failuresTableBody">
+                  <tr>
+                    <td colspan="4" class="no-data">No failures yet.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Exceptions Tab -->
+          <div id="exceptionsTab" class="tab-panel">
+            <div class="table-container">
+              <table class="stats-table">
+                <thead>
+                  <tr>
+                    <th>Count</th>
+                    <th>Exception Type</th>
+                    <th>Traceback</th>
+                  </tr>
+                </thead>
+                <tbody id="exceptionsTableBody">
+                  <tr>
+                    <td colspan="3" class="no-data">No exceptions yet.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Download Data Tab -->
+          <div id="downloadTab" class="tab-panel">
+            <div class="download-section">
+              <h3>📥 Download Test Data</h3>
+              <p class="help-text">Download test results and reports</p>
+              
+              <div class="download-buttons">
+                <button class="btn-download" id="downloadZipBtn" disabled>
+                  � Download ZIP
+                </button>
+                <button class="btn-download" id="downloadCsvBtn" disabled>
+                  � Download CSV
+                </button>
+                <button class="btn-download" id="downloadReportBtn" disabled>
+                  📑 Open HTML Report
+                </button>
+                <button class="btn-download" id="downloadLogsBtn" disabled>
+                  📝 Download JMeter Log
+                </button>
+              </div>
+
+              <div id="downloadInfo" style="margin-top: 20px;">
+                <p class="help-text" id="downloadInfoText">Complete a test to enable downloads.</p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 

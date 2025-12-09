@@ -66,4 +66,57 @@ function parseJMX(jmxPath) {
   }
 }
 
-module.exports = { parseJMX };
+/**
+ * Parse JMX file and extract HTTP Samplers (endpoints)
+ * @param {string} jmxPath - Path to JMX file
+ * @returns {Array} Array of sampler names
+ */
+function parseSamplers(jmxPath) {
+  try {
+    const jmxContent = fs.readFileSync(jmxPath, 'utf-8');
+    
+    const parser = new XMLParser({
+      ignoreAttributes: false,
+      attributeNamePrefix: '@_'
+    });
+    
+    const jmxData = parser.parse(jmxContent);
+    const samplers = [];
+    
+    function findSamplers(obj, depth = 0) {
+      if (!obj || depth > 15) return;
+      
+      if (Array.isArray(obj)) {
+        obj.forEach(item => findSamplers(item, depth + 1));
+      } else if (typeof obj === 'object') {
+        // Check if this is an HTTP Sampler
+        if (obj['@_testclass'] === 'HTTPSamplerProxy' || 
+            obj['@_testclass'] === 'HTTPSampler' ||
+            obj['@_testclass'] === 'JSR223Sampler' ||
+            obj['@_testclass'] === 'JDBCSampler') {
+          const name = obj['@_testname'] || 'Unnamed Request';
+          const enabled = obj['@_enabled'] !== 'false';
+          
+          if (enabled && !samplers.includes(name)) {
+            samplers.push(name);
+          }
+        }
+        
+        Object.values(obj).forEach(value => {
+          if (typeof value === 'object') {
+            findSamplers(value, depth + 1);
+          }
+        });
+      }
+    }
+    
+    findSamplers(jmxData);
+    return samplers;
+    
+  } catch (error) {
+    console.error('Error parsing samplers:', error.message);
+    return [];
+  }
+}
+
+module.exports = { parseJMX, parseSamplers };
