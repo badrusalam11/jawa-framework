@@ -1,4 +1,4 @@
-# JAWA Framework 🚀# JAWA Framework 🎯
+# JAWA Framework 🎯
 
 
 
