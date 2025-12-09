@@ -31,8 +31,31 @@ program
   .option('--base-url <url>', 'Base URL for testing', 'http://localhost:8080')
   .option('-g, --gui', 'Open JMeter GUI', false)
   .option('--heap <memory>', 'JVM heap memory (e.g., 3g, 2048m)', '3g')
-  .action((options) => {
-    runCommand(options);
+  .option('--web', 'Launch web UI for interactive test configuration', false)
+  .option('-p, --port <number>', 'Port for web UI server (default: 7247 or from .env)')
+  .action(async (options) => {
+    if (options.web) {
+      const WebServer = require('../src/web/server');
+      const open = require('open');
+      // Only pass port if explicitly specified by user
+      const port = options.port ? parseInt(options.port) : null;
+      const server = new WebServer(port);
+      await server.start();
+      
+      // Auto-open browser
+      setTimeout(() => {
+        open(`http://localhost:${server.port}`);
+      }, 1000);
+      
+      // Keep server running
+      process.on('SIGINT', () => {
+        console.log(chalk.yellow('\n\n👋 Shutting down server...\n'));
+        server.stop();
+        process.exit(0);
+      });
+    } else {
+      runCommand(options);
+    }
   });
 
 program

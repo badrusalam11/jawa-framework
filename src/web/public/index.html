@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JAWA Performance Test Runner</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🚀 JAWA Performance Test Runner</h1>
+      <p class="subtitle">Configure and run your JMeter tests</p>
+    </header>
+
+    <main id="app">
+      <div class="loading" id="loading">
+        <div class="spinner"></div>
+        <p>Loading thread groups...</p>
+      </div>
+
+      <form id="testForm" style="display: none;">
+        <!-- Thread Groups Section -->
+        <section class="form-section">
+          <h2>📋 Select Thread Groups</h2>
+          <div id="threadGroupsContainer" class="checkbox-group">
+            <!-- Thread groups will be loaded here -->
+          </div>
+        </section>
+
+        <!-- Test Configuration -->
+        <section class="form-section">
+          <h2>⚙️ Test Configuration</h2>
+          
+          <div class="form-group">
+            <label for="environment">🌍 Target Environment</label>
+            <select id="environment" name="environment" required>
+              <option value="">-- Select Environment --</option>
+            </select>
+            <p class="help-text">Select the environment from prop/ and data/ folders</p>
+          </div>
+          
+          <div class="form-group">
+            <label for="users">👥 Number of Users (peak concurrency)</label>
+            <input type="number" id="users" name="users" value="1" min="1" required>
+          </div>
+
+          <div class="form-group">
+            <label for="rampUp">⏱️ Ramp Up Period (seconds)</label>
+            <input type="number" id="rampUp" name="rampUp" value="1" min="1" required>
+          </div>
+
+          <div class="form-group">
+            <label>🔄 Test Mode</label>
+            <div class="radio-group">
+              <label class="radio-label">
+                <input type="radio" name="mode" value="loop" checked>
+                <span>Loop Count</span>
+              </label>
+              <label class="radio-label">
+                <input type="radio" name="mode" value="duration">
+                <span>Duration (seconds)</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="value" id="valueLabel">Loop Count</label>
+            <input type="number" id="value" name="value" value="1" min="1" required>
+          </div>
+        </section>
+
+        <!-- Advanced Options -->
+        <section class="form-section">
+          <h2>⚙️ Advanced Options (Optional)</h2>
+          <p class="help-text">Override JMeter properties (e.g., custom variables from user.properties)</p>
+          
+          <div id="advancedOptionsContainer">
+            <!-- Advanced options will be added here -->
+          </div>
+          
+          <button type="button" id="addOptionBtn" class="btn-secondary">
+            + Add Property
+          </button>
+        </section>
+
+        <!-- Submit Button -->
+        <div class="form-actions">
+          <button type="submit" id="startTestBtn" class="btn-primary">
+            🚀 START TEST
+          </button>
+        </div>
+      </form>
+
+      <!-- Test Running Status -->
+      <div id="testRunning" style="display: none;">
+        <div class="status-box success">
+          <h2>✅ Test Started Successfully!</h2>
+          <p>Your test is running in the background. Check the terminal for real-time progress.</p>
+          <p class="status-info">Report will be generated at: <code id="reportPath"></code></p>
+          <button type="button" id="backBtn" class="btn-secondary">
+            ← Back to Form
+          </button>
+        </div>
+      </div>
+
+      <!-- Error Message -->
+      <div id="errorMessage" style="display: none;">
+        <div class="status-box error">
+          <h2>❌ Error</h2>
+          <p id="errorText"></p>
+          <button type="button" id="retryBtn" class="btn-secondary">
+            ← Try Again
+          </button>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="/app.js"></script>
+</body>
+</html>
