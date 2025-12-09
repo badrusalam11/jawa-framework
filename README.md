@@ -12,7 +12,7 @@ A modern CLI tool to simplify JMeter performance testing. Initialize projects, r
 ## 📦 Installation
 
 ```bash
-npm install -g jawa
+npm install -g jawa-framework
 ```
 
 Verify installation:
