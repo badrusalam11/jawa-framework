@@ -137,6 +137,8 @@ Run JMeter performance test.
 | --base-url | Override base URL | - |
 | -g, --gui | Open JMeter GUI | false |
 | -f, --file | Test file path | plan/main.jmx |
+| --web | Launch interactive web UI | false |
+| -p, --port | Web UI port | 7247 or .env |
 
 **Examples:**
 ```bash
@@ -157,6 +159,48 @@ jawa run --user=20 --ramp=5 --duration=300
 
 # Custom base URL
 jawa run --loop=5 --user=10 --base-url=https://api.example.com
+
+# 🌐 Launch Web UI (Locust-style interface)
+jawa run --web
+
+# Web UI on custom port
+jawa run --web --port=8080
+```
+
+#### 🌐 Web UI Mode (--web)
+
+Launch an interactive web interface for test configuration and real-time monitoring.
+
+**Features:**
+- 🎯 **Thread Group Selection** - Choose which thread groups to run
+- 📊 **Real-time Statistics** - Live monitoring with 2-second polling
+- 📈 **Charts** - RPS, Response Time, Active Users visualization
+- 💾 **Download Reports** - ZIP, CSV, HTML report, JMeter logs
+- 🔄 **State Persistence** - Resume monitoring after page refresh
+- 🎨 **Modern UI** - Clean, responsive interface inspired by Locust
+
+**Usage:**
+```bash
+# Start web UI (opens browser automatically)
+jawa run --web
+
+# Access at: http://localhost:7247
+```
+
+**Tabs:**
+- **Statistics**: Real-time request metrics (requests, failures, response times, percentiles)
+- **Charts**: Visual graphs for RPS, response time trends, and user load
+- **Failures**: Track failed requests with error details
+- **Exceptions**: Monitor test exceptions and errors
+- **Download Data**: Export results in multiple formats
+
+**Configuration:**
+```bash
+# Set port in .env file
+PORT=8080
+
+# Or via command line
+jawa run --web --port=8080
 ```
 
 ### jawa report

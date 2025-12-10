@@ -1,7 +1,7 @@
 {
   "name": "jawa-framework",
-  "version": "1.0.1",
-  "description": "JavaScript Apache Wrapper for JMeter - Performance testing CLI tool",
+  "version": "1.1.0",
+  "description": "JavaScript Apache Wrapper for JMeter - Performance testing CLI tool with interactive Web UI",
   "main": "src/index.js",
   "bin": {
     "jawa": "./bin/jawa.js"
