@@ -6,6 +6,7 @@ const packageJson = require('../package.json');
 const initCommand = require('../src/commands/init');
 const runCommand = require('../src/commands/run');
 const reportCommand = require('../src/commands/report');
+const statsCommand = require('../src/commands/stats');
 
 program
   .name('jawa')
@@ -31,6 +32,7 @@ program
   .option('--base-url <url>', 'Base URL for testing', 'http://localhost:8080')
   .option('-g, --gui', 'Open JMeter GUI', false)
   .option('--heap <memory>', 'JVM heap memory (e.g., 3g, 2048m)', '3g')
+  .option('--remote <hosts>', 'Remote hosts for distributed testing (comma-separated IPs)')
   .option('--web', 'Launch web UI for interactive test configuration', false)
   .option('-p, --port <number>', 'Port for web UI server (default: 7247 or from .env)')
   .action(async (options) => {
@@ -63,6 +65,14 @@ program
   .description('Open latest HTML test report in browser')
   .action(() => {
     reportCommand();
+  });
+
+program
+  .command('stats')
+  .description('Analyze JMeter CSV results and calculate RPS/metrics')
+  .option('-f, --file <path>', 'Path to JMeter CSV result file')
+  .action((options) => {
+    statsCommand(options);
   });
 
 program

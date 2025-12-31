@@ -86,8 +86,15 @@ header {
   color: white;
 }
 
+.btn-stop:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  transform: none;
+}
+
 .btn-stop:hover {
-  background: #b71c1c;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(255, 107, 107, 0.3);
 }
 
 .btn-reset {
@@ -96,7 +103,8 @@ header {
 }
 
 .btn-reset:hover {
-  background: #f57c00;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(255, 107, 107, 0.3);
 }
 
 main {

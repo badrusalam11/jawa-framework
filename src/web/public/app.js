@@ -315,6 +315,7 @@ async function handleSubmit(e) {
   const rampUp = parseInt(document.getElementById('rampUp').value);
   const mode = document.querySelector('input[name="mode"]:checked').value;
   const value = parseInt(document.getElementById('value').value);
+  const remoteHosts = document.getElementById('remoteHosts').value.trim();
   
   if (!environment) {
     alert('Please select an environment!');
@@ -337,6 +338,7 @@ async function handleSubmit(e) {
     rampUp,
     mode,
     value,
+    remoteHosts, // Add remote hosts
     advancedOptions
   };
   
@@ -591,6 +593,12 @@ function startStatsPolling() {
       // Always update stats table with latest data
       updateStatsTable(data.requests);
       
+      // Update failures table
+      updateFailuresTable();
+      
+      // Update exceptions table
+      updateExceptionsTable();
+      
       if (data.status === 'RUNNING') {
         statusValue.style.color = 'white';
         // Enable stop button when running
@@ -653,6 +661,69 @@ function updateStatsTable(requests) {
       <td>${req.currentFailures}</td>
     </tr>
   `).join('');
+}
+
+// Update failures table
+async function updateFailuresTable() {
+  const tbody = document.getElementById('failuresTableBody');
+  
+  try {
+    const response = await fetch('/api/failures');
+    const data = await response.json();
+    
+    if (!data.failures || data.failures.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="3" class="no-data">No failures yet.</td></tr>';
+      return;
+    }
+    
+    tbody.innerHTML = data.failures.map(failure => `
+      <tr style="background-color: rgba(244, 67, 54, 0.1);">
+        <td style="font-weight: 600; color: #f44336; text-align: center;">${failure.count}</td>
+        <td style="font-weight: 500;">${failure.label}</td>
+        <td style="color: #f44336; max-width: 500px; white-space: normal; word-break: break-word;" title="${failure.failureMessage}">${failure.failureMessage}</td>
+      </tr>
+    `).join('');
+  } catch (error) {
+    console.error('Failed to fetch failures:', error);
+    tbody.innerHTML = '<tr><td colspan="3" class="no-data">Failed to load failures data.</td></tr>';
+  }
+}
+
+// Update exceptions table
+async function updateExceptionsTable() {
+  const tbody = document.getElementById('exceptionsTableBody');
+  
+  try {
+    const response = await fetch('/api/exceptions');
+    const data = await response.json();
+    
+    if (!data.exceptions || data.exceptions.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="4" class="no-data">No exceptions found.</td></tr>';
+      return;
+    }
+    
+    tbody.innerHTML = data.exceptions.map(exc => `
+      <tr style="background-color: rgba(255, 152, 0, 0.1);">
+        <td style="font-weight: 600; color: #ff9800; text-align: center;">${exc.count}</td>
+        <td style="font-size: 0.85em; color: #666;">${exc.firstOccurrence}</td>
+        <td style="font-family: monospace; font-size: 0.85em; color: #555;">${exc.component}</td>
+        <td>
+          <div style="max-width: 600px;">
+            <div style="font-weight: 500; color: #ff5722; margin-bottom: 5px;">${exc.message}</div>
+            ${exc.stackTrace && exc.stackTrace.length > 0 ? `
+              <details style="margin-top: 8px;">
+                <summary style="cursor: pointer; color: #1976d2; font-size: 0.9em;">Show Stack Trace</summary>
+                <pre style="margin-top: 8px; padding: 12px; background: #f5f5f5; border-left: 3px solid #ff9800; overflow-x: auto; font-size: 0.75em; color: #333;">${exc.stackTrace.join('\n')}</pre>
+              </details>
+            ` : ''}
+          </div>
+        </td>
+      </tr>
+    `).join('');
+  } catch (error) {
+    console.error('Failed to fetch exceptions:', error);
+    tbody.innerHTML = '<tr><td colspan="4" class="no-data">Failed to load exceptions data.</td></tr>';
+  }
 }
 
 // Update charts

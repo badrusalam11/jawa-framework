@@ -81,6 +81,8 @@ async function runCommand(options) {
   const baseUrl = options.baseUrl || envVars.BASE_URL || 'http://localhost:8080';
   const gui = options.gui || false;
   const heapSize = options.heap || envVars.HEAP_SIZE || '3g';
+  const remoteHosts = options.remote || ''; // Remote hosts for distributed testing
+  const isDistributed = remoteHosts.trim().length > 0;
   
   // Generate timestamp for this run (format: YYYYMMDD-HHMMSS)
   const now = new Date();
@@ -126,6 +128,10 @@ async function runCommand(options) {
   console.log(chalk.cyan('Configuration:'));
   console.log(chalk.gray(`  Environment   : ${targetEnv} ${chalk.yellow(`(from ${envSource})`)}`));
   console.log(chalk.gray(`  Test File     : ${jmxFile}`));
+  console.log(chalk.gray(`  Mode          : ${isDistributed ? 'Distributed (Remote)' : 'Local'}`));
+  if (isDistributed) {
+    console.log(chalk.gray(`  Remote Hosts  : ${remoteHosts}`));
+  }
   console.log(chalk.gray(`  Users         : ${threadCount}`));
   console.log(chalk.gray(`  Ramp-up       : ${rampUp}s`));
   console.log(chalk.gray(`  Loop Count    : ${loopCount}`));
@@ -169,6 +175,11 @@ async function runCommand(options) {
     `-JthreadLifetimeDuration=${effectiveDuration}`,
     `-Jbase.url=${baseUrl}`
   ];
+
+  // Add remote hosts if specified (Distributed Testing)
+  if (isDistributed) {
+    jmeterArgs.push('-R', remoteHosts);
+  }
 
   // Add environment-specific user.properties if exists
   const envUserProps = path.join('prop', targetEnv, 'user.properties');
@@ -229,8 +240,13 @@ async function runCommand(options) {
   const env = { ...process.env };
   env.HEAP = heapArgs;
   
-  // For Windows compatibility, we need to set JVM_ARGS
-  if (process.platform === 'win32') {
+  // If distributed testing, disable SSL for RMI
+  if (isDistributed) {
+    env.JVM_ARGS = '-Dserver.rmi.ssl.disable=true';
+    console.log(chalk.yellow('🔓 Distributed Testing: SSL disabled for RMI communication'));
+    console.log(chalk.gray(`   JVM_ARGS=${env.JVM_ARGS}\n`));
+  } else if (process.platform === 'win32') {
+    // For Windows compatibility, we need to set JVM_ARGS
     env.JVM_ARGS = heapArgs;
   }
 
